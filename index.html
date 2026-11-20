@@ -208,6 +208,13 @@ details.term .seen{font-size:13px;color:var(--muted);margin-top:6px}
 .tryit .trymeta{display:block;font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:2px 0 6px}
 .tryit p{margin:6px 0 0}
 .tryit .trynote{font-size:13px;color:var(--muted)}
+.tryact{margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.tryact p{margin:0 0 8px;font-weight:600;font-size:14.5px}
+.tryact .btns{display:flex;flex-wrap:wrap;gap:8px}
+.tryact a,.tryact button{font:600 14px var(--body);display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;text-decoration:none;cursor:pointer;border:1.5px solid var(--warm);background:var(--warm);color:#fff}
+.tryact button.copy{background:transparent;color:var(--warm-ink)}
+.tryact a:hover,.tryact button:hover{filter:brightness(1.08)}
+.tryact .hint{display:block;margin-top:8px;font-size:13px;color:var(--muted)}
 .tryit pre{white-space:pre-wrap;font:14px/1.5 var(--mono);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0 0}
 .oneline{font-size:16px;border-left:4px solid var(--warm);padding:8px 12px;background:var(--surface);border-radius:0 12px 12px 0;box-shadow:var(--shadow)}
 
@@ -824,6 +831,26 @@ section:has(> h2 .n){padding-top:12px}
     if(/^https?:/i.test(href)&&el.host!==location.host){el.target='_blank';el.rel='noopener';}
   },true);
   if(/^#d-/.test(location.hash)) route();
+})();
+</script>
+<script>
+/* "Try this today": one tap opens ChatGPT or Claude with the prompt already filled in. */
+(function(){
+  document.querySelectorAll('.tryit pre').forEach(function(pre){
+    var text=pre.textContent.trim(), q=encodeURIComponent(text);
+    var box=document.createElement('div'); box.className='tryact';
+    box.innerHTML='<p>Ready to try it now?</p><div class="btns">'+
+      '<a href="https://chatgpt.com/?q='+q+'" target="_blank" rel="noopener">Open in ChatGPT</a>'+
+      '<a href="https://claude.ai/new?q='+q+'" target="_blank" rel="noopener">Open in Claude</a>'+
+      '<button type="button" class="copy">Copy prompt</button></div>'+
+      '<span class="hint">It opens with the prompt filled in. For a spoken conversation, tap the voice button in the app (the microphone or sound-wave icon), then read the prompt aloud or send it first.</span>';
+    pre.insertAdjacentElement('afterend',box);
+    box.querySelector('.copy').addEventListener('click',function(){var b=this;
+      function done(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy prompt';},1800);}
+      function sel(){var r=document.createRange();r.selectNodeContents(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand('copy');done();}catch(e){}}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done,sel);}else{sel();}
+    });
+  });
 })();
 </script>
 
