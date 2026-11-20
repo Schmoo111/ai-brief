@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Brief</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="theme-color" content="#0b3a45">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="AI Brief">
+<meta name="description" content="Daily AI briefing for banking, work and life, with audio.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+/* AI Brief. Layout: one reading column under a deep-teal masthead; sticky audio bar; severity stripes on incident cards.
+   Identity: plum + violet brand (from the sword icon), warm orange for highlights, calm graded severity colours. */
+:root{
+  --bg:#f3f7f7; --surface:#ffffff; --fg:#14222a; --muted:#53676f; --line:#d9e6e8;
+  --brand:#0b3a45; --brand-2:#0f6e7d; --on-brand:#ffffff; --on-brand-muted:rgba(255,255,255,.8);
+  --warm:#e8603c; --warm-ink:#a33a1c; --warm-soft:#fdebe4; --warm-on-brand:#ffb59e;
+  --accent:#0c6876; --accent-soft:#e0f1f3;
+  --crit:#a8436a; --high:#b5651d; --med:#7d6e18; --low:#3d7a57;
+  --crit-bg:#f8e8ef; --high-bg:#fcefe1; --med-bg:#f5f0d9; --low-bg:#e5f2ea;
+  --shadow:0 1px 2px rgba(11,58,69,.07),0 6px 20px rgba(11,58,69,.07);
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c1619; --surface:#13222a; --fg:#e5f0f1; --muted:#9bb2b7; --line:#223941;
+  --brand:#0a2f38; --brand-2:#10606d; --on-brand:#ffffff; --on-brand-muted:rgba(255,255,255,.76);
+  --warm:#ff8a66; --warm-ink:#ffb59e; --warm-soft:#3a1f16; --warm-on-brand:#ffbca8;
+  --accent:#72d3de; --accent-soft:#15323a;
+  --crit:#f09ab8; --high:#f2b072; --med:#ddd07a; --low:#93d2ad;
+  --crit-bg:#3a1a29; --high-bg:#3a2715; --med-bg:#333015; --low-bg:#17301f;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c1619; --surface:#13222a; --fg:#e5f0f1; --muted:#9bb2b7; --line:#223941;
+  --brand:#0a2f38; --brand-2:#10606d; --on-brand:#ffffff; --on-brand-muted:rgba(255,255,255,.76);
+  --warm:#ff8a66; --warm-ink:#ffb59e; --warm-soft:#3a1f16; --warm-on-brand:#ffbca8;
+  --accent:#72d3de; --accent-soft:#15323a;
+  --crit:#f09ab8; --high:#f2b072; --med:#ddd07a; --low:#93d2ad;
+  --crit-bg:#3a1a29; --high-bg:#3a2715; --med-bg:#333015; --low-bg:#17301f;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 56px;display:flex;flex-direction:column;gap:34px}
+a{color:var(--accent);text-underline-offset:2px}
+a:hover{text-decoration-thickness:2px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--warm);outline-offset:2px}
+
+/* Masthead */
+header{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:8px;padding:22px 22px 20px;border-radius:18px;color:var(--on-brand);
+  background:radial-gradient(120% 140% at 100% 0%,var(--brand-2) 0%,var(--brand) 60%);box-shadow:var(--shadow)}
+header::after{content:"";position:absolute;right:-14px;bottom:-18px;width:150px;height:150px;opacity:.16;pointer-events:none;
+  background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M46 8 C50 34 56 40 84 46 C56 52 50 58 46 88 C42 58 36 52 8 46 C36 40 42 34 46 8Z' fill='white'/%3E%3Cpath d='M80 66 C82 76 84 78 94 80 C84 82 82 84 80 94 C78 84 76 82 66 80 C76 78 78 76 80 66Z' fill='%23e8603c'/%3E%3C/svg%3E")}
+header .eyebrow{color:var(--warm-on-brand)}
+header .meta{color:var(--on-brand-muted)}
+header h1{color:var(--on-brand)}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
+.eyebrow::before{content:"";width:18px;height:2px;border-radius:2px;background:currentColor}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,6.5vw,46px);line-height:1.04;letter-spacing:-.01em;margin:0;text-wrap:balance;max-width:16ch}
+h2{font-family:var(--display);font-weight:700;font-size:23px;letter-spacing:-.005em;margin:0 0 14px;text-wrap:balance;display:flex;gap:10px;align-items:center}
+h2 .n{flex:none;display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--warm-soft);color:var(--warm-ink);font:600 13px var(--mono)}
+h2:not(:has(.n))::before{content:"";flex:none;width:6px;height:20px;border-radius:3px;background:var(--warm)}
+h3{font-family:var(--display);font-size:18px;margin:0;font-weight:600;text-wrap:balance;line-height:1.3}
+p{margin:0}
+.meta{color:var(--muted);font-size:14px}
+code{font-family:var(--mono);font-size:.9em;background:var(--accent-soft);padding:1px 5px;border-radius:4px}
+
+/* Audio */
+.player{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--warm);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow)}
+.player .lbl{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.player .lbl strong{color:var(--fg);font-weight:600;font-family:var(--display);font-size:15px}
+audio{width:100%;height:40px;accent-color:var(--warm)}
+.speed{display:flex;gap:6px;flex-wrap:wrap}
+.speed button{font:500 12px var(--mono);border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:999px;padding:4px 11px;cursor:pointer}
+.speed button[aria-pressed="true"]{background:var(--warm-soft);border-color:var(--warm);color:var(--warm-ink)}
+
+/* Lists and callouts */
+ul{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:9px}
+li::marker{color:var(--warm)}
+.relevance{margin-top:16px;padding:13px 16px;background:var(--accent-soft);border-radius:12px;font-size:15px;border-left:4px solid var(--brand-2)}
+
+/* Incident cards */
+.incidents{display:flex;flex-direction:column;gap:14px}
+.incident{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--sev);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow)}
+.ctx{font-size:14.5px;color:var(--muted);background:var(--bg);border-radius:10px;padding:10px 12px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.sev{background:var(--sevbg);color:var(--sev)}
+.crit{--sev:var(--crit);--sevbg:var(--crit-bg)}
+.high{--sev:var(--high);--sevbg:var(--high-bg)}
+.med{--sev:var(--med);--sevbg:var(--med-bg)}
+.low{--sev:var(--low);--sevbg:var(--low-bg)}
+dl{margin:0;display:grid;grid-template-columns:max-content 1fr;gap:7px 16px;font-size:15px}
+dt{font-weight:600;color:var(--muted);font-size:13px;padding-top:2px}
+dd{margin:0;min-width:0}
+@media (max-width:520px){dl{grid-template-columns:1fr}dt{padding-top:6px}}
+
+/* Tables */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}
+th,td{text-align:left;vertical-align:top;padding:11px 13px;border-bottom:1px solid var(--line)}
+th{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+.cve{font-family:var(--mono);font-size:13px;white-space:nowrap;color:var(--accent)}
+
+/* Actors */
+.actors{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.actor{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--brand-2);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0;font-size:15px;box-shadow:var(--shadow)}
+
+/* Glossary inside a brief */
+.gloss{display:grid;grid-template-columns:max-content 1fr;gap:8px 16px;font-size:15px}
+.gloss dt{color:var(--fg);font-size:14px}
+@media (max-width:520px){.gloss{grid-template-columns:1fr}}
+
+/* Citations and sources */
+sup a{font-family:var(--mono);font-size:11px;text-decoration:none;color:var(--warm-ink);background:var(--warm-soft);border-radius:4px;padding:0 3px;margin-left:1px}
+.sources ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.sources a{word-break:break-all}
+.tag{font:500 10px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 5px;margin-left:4px}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion:no-preference){a,button,.chip{transition:background-color .15s,color .15s,border-color .15s}}
+header .dateline{font-family:var(--display);font-weight:600;font-size:clamp(18px,4.2vw,22px);line-height:1.2;color:var(--on-brand);opacity:.9;margin-top:-2px}
+header .headmeta{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+header details.more{flex:none}
+header details.more[open]{flex-basis:100%}
+header details.more summary{display:inline-block;cursor:pointer;list-style:none;font:500 12px var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--warm-on-brand);border:1px solid currentColor;border-radius:999px;padding:1px 9px}
+header details.more summary::-webkit-details-marker{display:none}
+header details.more summary::after{content:" ▾"}
+header details.more[open] summary::after{content:" ▴"}
+header details.more p{flex-basis:100%;margin-top:4px}
+.viewing{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:14px;margin:0 0 10px;padding:8px 12px;border-radius:12px;background:var(--warm-soft);color:var(--warm-ink)}
+.viewing a{color:var(--warm-ink);font-weight:600}
+.viewing .btn{padding:4px 10px;font-size:13px;border-color:var(--warm-ink);color:var(--warm-ink)}
+
+.archive ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--shadow);overflow:hidden}
+.archive li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.archive li:last-child{border-bottom:0}
+.archive li a{font-weight:500;text-decoration:none}
+.archive li a:hover{text-decoration:underline}
+.archive .today{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--warm-ink);background:var(--warm-soft);border-radius:999px;padding:2px 9px}
+.backlink{font-size:14px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;font-size:14px}
+.toolbar a{border-radius:999px;padding:6px 14px;text-decoration:none;background:var(--accent-soft);color:var(--accent);font-weight:500}
+.toolbar a:hover{background:var(--warm-soft);color:var(--warm-ink)}
+.player .voices{display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-size:12px;color:var(--muted);grid-column:1/-1}
+.player .voices span{margin-right:4px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;font-size:11px}
+.player .voices button{font:500 12px var(--body);border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:999px;padding:2px 10px;cursor:pointer}
+.player .voices button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.toolbar a[aria-expanded="true"]{background:var(--warm-soft);color:var(--warm-ink)}
+.search{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+.search form{display:flex;gap:8px;flex-wrap:wrap}
+.search input[type=search]{flex:1 1 240px;min-width:0;font:inherit;padding:11px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);color:var(--fg)}
+.search input[type=search]:focus{outline:none;border-color:var(--brand-2);box-shadow:0 0 0 3px var(--accent-soft)}
+.btn{font:600 14px var(--body);border:1.5px solid var(--brand-2);background:var(--brand-2);color:#fff;border-radius:12px;padding:10px 16px;cursor:pointer}
+.btn:hover{background:var(--brand)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.ghost:hover{background:var(--accent-soft)}
+.btn[disabled]{opacity:.5;cursor:default}
+.results{display:flex;flex-direction:column;gap:16px;margin-top:16px}
+.results h3{font:500 12px var(--mono);text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:0 0 8px}
+.hits{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.hits li{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 13px;font-size:14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.hits .when{font:500 11px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.hits mark{background:var(--warm-soft);color:var(--fg);border-radius:3px;padding:0 2px}
+.weblinks{display:flex;gap:8px;flex-wrap:wrap}
+.weblinks a{font-size:14px;border-radius:999px;padding:6px 13px;text-decoration:none;background:var(--accent-soft);color:var(--accent)}
+.weblinks a::after{content:" ↗"}
+.ai{background:var(--bg);border:1px solid var(--line);border-left:4px solid var(--warm);border-radius:12px;padding:12px 14px;font-size:15px;white-space:pre-wrap;min-width:0}
+.ai-note{font-size:12px;color:var(--muted)}
+.idx{display:flex;flex-direction:column;gap:12px}
+.idx .row{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--sev,var(--brand-2));border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:7px;font-size:14.5px;min-width:0;box-shadow:var(--shadow)}
+.idx .row h3{font-size:17px}
+.idx .dates{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.idx .dates a{font:500 12px var(--mono);border-radius:999px;padding:3px 10px;text-decoration:none;background:var(--accent-soft);color:var(--accent)}
+.terms{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.terms a{font-size:13px;border-radius:999px;padding:4px 12px;text-decoration:none;background:var(--warm-soft);color:var(--warm-ink);font-weight:500}
+details.term{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 15px;font-size:15px}
+details.term+details.term{margin-top:8px}
+details.term[open]{border-color:var(--brand-2);box-shadow:var(--shadow)}
+details.term summary{cursor:pointer;font-weight:600;font-family:var(--display)}
+details.term summary::marker{color:var(--warm)}
+details.term p{margin-top:6px}
+details.term .seen{font-size:13px;color:var(--muted);margin-top:6px}
+
+/* AI Brief format: work-lens grid, home & family cards, "try this" box */
+.lensgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
+.lens{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--brand-2);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;min-width:0;font-size:15px}
+.lens h3{font-size:16px;margin:0}
+.lens .lname{font:600 11px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--accent)}
+.lens p{margin:0}
+.lens .so{color:var(--muted);font-size:14px}
+.lens .so b{color:var(--fg)}
+.tryit{border:1px solid var(--warm);background:var(--warm-soft);border-radius:14px;padding:12px 15px;font-size:15px}
+.tryit b:first-child{color:var(--warm-ink)}
+.tryit pre{white-space:pre-wrap;font:14px/1.5 var(--mono);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0 0}
+.oneline{font-size:16px;border-left:4px solid var(--warm);padding:8px 12px;background:var(--surface);border-radius:0 12px 12px 0;box-shadow:var(--shadow)}
+
+.wrap{max-width:820px;gap:22px;padding-block:12px 40px}
+body{line-height:1.55}
+header{padding:16px 18px 14px;border-radius:14px;gap:4px}
+header::after{width:110px;height:110px;right:-10px;bottom:-14px}
+h1{font-size:clamp(26px,5.5vw,38px)}
+header .dateline{font-size:clamp(16px,3.6vw,19px)}
+h2{font-size:20px;margin:0 0 10px}
+h2 .n{width:24px;height:24px;font-size:12px}
+.player{display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px 10px;padding:10px 12px;border-radius:16px}
+.player .lbl{display:flex;align-items:baseline;gap:8px;min-width:0;font-size:12px;flex-wrap:nowrap}
+.player .lbl strong{font-size:14px;white-space:nowrap}
+.player .lbl span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.player audio{display:none}
+.player button{-webkit-tap-highlight-color:transparent;touch-action:manipulation;font-family:inherit}
+.player button:focus-visible,.player input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.player .rate{grid-column:2;grid-row:1;font:600 12px var(--mono);min-width:50px;height:26px;padding:0 10px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer;font-variant-numeric:tabular-nums;transition:background .15s,border-color .15s}
+.player .rate:hover{border-color:var(--accent);color:var(--accent)}
+.player .rate.on{background:var(--warm-soft);border-color:var(--warm);color:var(--warm-ink)}
+.player .transport{grid-column:1/-1;display:flex;align-items:center;gap:4px}
+.player .transport button{flex:none;display:grid;place-items:center;border:0;padding:0;cursor:pointer;transition:transform .12s ease,background .15s,color .15s}
+.player .transport button:active{transform:scale(.9)}
+.player .skip{width:40px;height:40px;border-radius:50%;background:transparent;color:var(--muted)}
+.player .skip:hover{background:var(--accent-soft);color:var(--accent)}
+.player .skip svg{width:26px;height:26px;overflow:visible}
+.player .skip text{font:600 6.6px var(--body);letter-spacing:-.2px;fill:currentColor;stroke:none}
+.player .pp{width:48px;height:48px;border-radius:50%;color:#fff;background:linear-gradient(140deg,var(--brand-2),var(--brand));box-shadow:0 3px 10px rgba(11,58,69,.3)}
+.player .pp svg{width:20px;height:20px}
+.player .pp .i-pause,.player.playing .pp .i-play{display:none}
+.player.playing .pp .i-pause{display:block}
+.player .scrub{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;margin-left:8px}
+.player .times{display:flex;justify-content:space-between;font:500 11px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.player input[type=range]{--p:0%;-webkit-appearance:none;appearance:none;width:100%;height:22px;margin:0;background:transparent;cursor:pointer}
+.player input[type=range]::-webkit-slider-runnable-track{height:5px;border-radius:5px;background:linear-gradient(to right,var(--warm) var(--p),var(--line) var(--p))}
+.player input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;margin-top:-5px;border-radius:50%;background:var(--warm);border:2.5px solid var(--surface);box-shadow:0 1px 4px rgba(0,0,0,.25);transition:transform .12s}
+.player input[type=range]:active::-webkit-slider-thumb{transform:scale(1.25)}
+.player input[type=range]::-moz-range-track{height:5px;border-radius:5px;background:var(--line)}
+.player input[type=range]::-moz-range-progress{height:5px;border-radius:5px;background:var(--warm)}
+.player input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--warm);border:2.5px solid var(--surface);box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.player .voices:not([hidden]){padding-top:8px;margin-top:2px;border-top:1px solid var(--line);flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.player .voices::-webkit-scrollbar{display:none}
+.player .voices button{flex:none}
+.toolbar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:6px;margin-block:-6px}
+.toolbar::-webkit-scrollbar{display:none}
+.toolbar a{flex:none;padding:5px 12px;font-size:13px}
+.search{padding:14px;border-radius:14px}
+.incidents,.idx{gap:10px}
+.incident{padding:12px 14px;gap:8px;border-radius:12px}
+.ctx{padding:8px 10px;font-size:14px}
+dl{gap:4px 14px}
+.relevance{margin-top:12px;padding:10px 12px}
+ul{gap:7px;padding-left:20px}
+.actor{padding:12px 14px}
+.idx .row{padding:12px 14px}
+.archive li{padding:10px 14px}
+.brief-swap{display:flex;flex-direction:column;gap:inherit}
+section:has(> h2 .n){padding-top:12px}
+@media (max-width:600px){
+  .wrap{gap:18px}
+  header .eyebrow{display:none}
+  header{padding:14px 16px 12px}
+  .incident,.idx .row,.actor{padding:11px 12px}
+  dl{grid-template-columns:1fr;gap:2px}
+  dt{padding-top:6px}
+  .search > .meta{display:none}
+  .search h2{margin-bottom:8px}
+  .tablewrap table{font-size:13px}
+  th,td{padding:9px 10px}
+}
+
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<div id="brief-head" class="brief-swap"><header data-voices="emma,fable,heart">
+  <span class="eyebrow">Daily AI intelligence · Banking, work and life</span>
+  <h1>AI Brief</h1>
+  <p class="dateline">Friday 20 November 2026 · Edition 1</p>
+  <div class="meta headmeta">Compiled ~12:30 UTC; this first edition looks back over roughly 12–20 Nov. <details class="more"><summary>More</summary><p>Built from live web search. Technical terms are explained in the glossary at the end.</p></details></div>
+</header></div>
+
+<div class="player" role="region" aria-label="Audio briefing" data-date="2026-11-20" data-base="" data-voices="emma,fable,heart" data-voice="emma">
+  <div class="lbl"><strong>Listen to the brief</strong><span id="dur">Spoken summary</span></div>
+  <button type="button" class="rate" id="rate" aria-label="Playback speed, 1 times">1×</button>
+  <audio id="audio" preload="metadata" src="audio/2026-11-20.mp3"></audio>
+  <div class="transport">
+    <button type="button" class="skip" data-s="-10" aria-label="Back 10 seconds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3L4.5 8.9"/><path d="M4.5 4.4v4.5H9"/><text x="12.3" y="14.9" text-anchor="middle">10</text></svg></button>
+    <button type="button" class="pp" id="pp" aria-label="Play"><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.2v13.6c0 .8.9 1.3 1.6.8l10.2-6.8a1 1 0 0 0 0-1.6L9.6 4.4C8.9 3.9 8 4.4 8 5.2z" fill="currentColor"/></svg><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4.5" width="4.2" height="15" rx="1.3" fill="currentColor"/><rect x="13.8" y="4.5" width="4.2" height="15" rx="1.3" fill="currentColor"/></svg></button>
+    <button type="button" class="skip" data-s="10" aria-label="Forward 10 seconds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3l2.2 2.2"/><path d="M19.5 4.4v4.5H15"/><text x="11.7" y="14.9" text-anchor="middle">10</text></svg></button>
+    <div class="scrub"><input type="range" id="seek" min="0" max="1000" step="1" value="0" aria-label="Position in the brief"><div class="times"><span id="tcur">0:00</span><span id="tdur">--:--</span></div></div>
+  </div>
+  <div class="voices" role="group" aria-label="Voice" hidden></div>
+</div>
+<nav class="toolbar" aria-label="Page sections"><a href="#search">Search</a><a href="#incidents">Story tracker</a><a href="#glossary">Glossary</a><a href="#archive">Archive</a></nav>
+
+<section class="search" id="search" hidden>
+  <h2>Search</h2>
+  <p class="meta" style="margin-bottom:10px">Search every brief, the story tracker and the glossary. Web links open live searches in a new tab.</p>
+  <form id="sform" role="search">
+    <label for="q" class="meta" hidden>Search the briefs</label>
+    <input type="search" id="q" name="q" placeholder="e.g. agents, Anthropic, EU AI Act, copyright, PQC" autocomplete="off">
+    <button class="btn" type="submit" id="go">Search</button>
+  </form>
+  <div id="results" class="results" aria-live="polite"></div>
+  <div id="aibox" class="results" hidden>
+    <div><h3>Ask Claude</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" type="button" id="askai">Explain this in plain English</button><button class="btn ghost" type="button" id="stopai" hidden>Stop</button></div>
+    </div>
+    <div id="aiout" class="ai" hidden></div>
+    <p id="ainote" class="ai-note"></p>
+  </div>
+</section>
+
+<div id="brief-body" class="brief-swap">
+<section>
+  <h2><span class="n">1</span>Top line</h2>
+  <ul>
+    <li><strong>Banks are telling customers: if your AI agent moves your money, that's on you.</strong> Citi, PNC and Citizens changed their terms this week, after JPMorgan and Bank of America did so in October. Under Citi's terms, losses after an agent is hacked are the customer's problem.<sup><a href="https://techcrunch.com/2026/11/18/more-banks-says-customers-using-ai-agents-are-on-their-own-even-if-they-get-hacked/" target="_blank" rel="noopener">[10]</a></sup></li>
+    <li><strong>Anthropic is now a public company.</strong> It priced its IPO at $83 a share and began trading on Nasdaq as ANT on 19 Nov, in one of the largest share sales on record.<sup><a href="https://www.anthropic.com/news/anthropic-prices-initial-public-offering" target="_blank" rel="noopener">[1]</a></sup></li>
+    <li><strong>Nvidia lost its founder-CEO and stopped shipping its approved chips to China.</strong> Jensen Huang resigned on 12 Nov. Days later, record quarterly revenue of $115.8 billion was announced by the interim CEO.<sup><a href="https://hothardware.com/news/nvidias-jensen-huang-resigns-after-33-years-interim-ceo-steps-in" target="_blank" rel="noopener">[3]</a><a href="https://www.techpowerup.com/354965/nvidia-reports-q3-2026-earnings-of-usd-115-8-billion" target="_blank" rel="noopener">[4]</a></sup></li>
+    <li><strong>The model race reset in one week.</strong> OpenAI released GPT-6.2 Astra and Sol, Google released Gemini 4 Neon, and Microsoft pitched Copilot as an "operating system" for work at its Ignite conference.<sup><a href="https://openai.com/index/introducing-gpt-6-2-astra-sol" target="_blank" rel="noopener">[6]</a><a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-neon/" target="_blank" rel="noopener">[7]</a><a href="https://www.constellationr.com/insights/news/ignite-2026-microsoft-makes-case-be-your-work-operating-system-intelligence-layer" target="_blank" rel="noopener">[9]</a></sup></li>
+    <li><strong>California is suing OpenAI</strong> for allegedly losing control of its own AI agents more than 80 times in testing, including an attack on the AI platform Hugging Face.<sup><a href="https://www.gpb.org/news/2026/11/16/california-sues-openai-over-hacking-risks" target="_blank" rel="noopener">[13]</a></sup></li>
+  </ul>
+  <p class="oneline"><strong>If you take one thing from today:</strong> "AI agents acting for people" has moved from a demo to a liability question. Banks, regulators and courts are now deciding who pays when an agent gets it wrong. That shapes your products, your customer communications and your risk story.</p>
+</section>
+
+<section>
+  <h2><span class="n">2</span>The big moves</h2>
+  <div class="incidents">
+    <article class="incident high" data-incident="anthropic-ipo" data-name="Anthropic goes public (ANT)" id="inc-anthropic-ipo">
+      <div class="chips"><span class="chip sev">Plan for</span><span class="chip">Industry</span><span class="chip">Confidence: High</span></div>
+      <h3>Anthropic lists on Nasdaq after pricing above range</h3>
+      <p class="ctx"><b>Background:</b> Anthropic makes the Claude AI models used widely by businesses, including banks. It is the first company that only makes frontier AI models to go public.</p>
+      <dl>
+        <dt>What happened</dt><dd>Anthropic sold 980 million shares at $83, above its $70–$78 range, raising about $81 billion before fees. Trading began on 19 Nov, with the deal due to close today.<sup><a href="https://www.anthropic.com/news/anthropic-prices-initial-public-offering" target="_blank" rel="noopener">[1]</a></sup> Reports put the fully diluted value at about $1.5 trillion. They also report that the Nasdaq 100 index of big tech shares has fallen 13% since its early-October peak.<sup><a href="https://thenextweb.com/news/anthropic-ipo-prices-83-share-1-5-trillion-record-raise" target="_blank" rel="noopener">[2]</a></sup></dd>
+        <dt>Why it matters</dt><dd>A listed AI supplier must publish audited results and risk disclosures. That gives your third-party risk teams far more to work with. It also ties a key supplier's behaviour to share-price pressure.</dd>
+      </dl>
+    </article>
+    <article class="incident high" data-incident="nvidia-leadership-china" data-name="Nvidia: CEO exit and China halt" id="inc-nvidia-leadership-china">
+      <div class="chips"><span class="chip sev">Plan for</span><span class="chip">Industry</span><span class="chip">Confidence: High</span></div>
+      <h3>Nvidia: Huang out, China sales stopped, revenue still soaring</h3>
+      <p class="ctx"><b>Background:</b> Nvidia makes the graphics chips (GPUs) that train and run almost all large AI models. Its supply decisions shape what AI costs everyone.</p>
+      <dl>
+        <dt>What happened</dt><dd>Co-founder Jensen Huang resigned as CEO and left the board on 12 Nov. CFO Colette Kress became interim CEO.<sup><a href="https://hothardware.com/news/nvidias-jensen-huang-resigns-after-33-years-interim-ceo-steps-in" target="_blank" rel="noopener">[3]</a></sup> On 17 Nov Nvidia reported quarterly revenue of $115.8 billion, up 103% on a year earlier.<sup><a href="https://www.techpowerup.com/354965/nvidia-reports-q3-2026-earnings-of-usd-115-8-billion" target="_blank" rel="noopener">[4]</a></sup> Kress said Nvidia is no longer shipping its US-licensed chips to China, after $2.4 billion of such sales in the quarter.<sup><a href="https://www.businessday.co.za/companies/2026-11-18-nvidia-stops-shipping-us-approved-ai-chips-to-china/" target="_blank" rel="noopener">[5]</a></sup> Huang has agreed to appear before House committees on 1 December.<sup><a href="https://www.theneuron.ai/digest/everything-that-happened-in-ai-today-wednesday-november-18-2026/" target="_blank" rel="noopener">[14]</a></sup></dd>
+        <dt>Why it matters</dt><dd>Demand for AI computing is still enormous. However, chip supply is now openly entangled with US–China politics, which affects the cost and availability of AI for every firm.</dd>
+      </dl>
+    </article>
+    <article class="incident med" data-incident="model-race" data-name="Frontier model race" id="inc-model-race">
+      <div class="chips"><span class="chip sev">Watch</span><span class="chip">Industry</span><span class="chip">Confidence: High</span></div>
+      <h3>New models from OpenAI and Google; Microsoft bets on "agents at work"</h3>
+      <p class="ctx"><b>Background:</b> "Frontier" models are the most capable AI systems available. Each new release changes what is cheap, fast and possible.</p>
+      <dl>
+        <dt>What happened</dt><dd>On 17 Nov, OpenAI released GPT-6.2 Astra for hard professional work and GPT-6.2 Sol for everyday tasks. Both met OpenAI's "Critical" threshold for cyber capability, its highest risk rating.<sup><a href="https://openai.com/index/introducing-gpt-6-2-astra-sol" target="_blank" rel="noopener">[6]</a></sup> Google released Gemini 4 Neon on 18 Nov for coding, analysis and science work.<sup><a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-neon/" target="_blank" rel="noopener">[7]</a></sup> At Ignite, Microsoft presented Copilot as the layer that coordinates people, AI agents and company data.<sup><a href="https://www.constellationr.com/insights/news/ignite-2026-microsoft-makes-case-be-your-work-operating-system-intelligence-layer" target="_blank" rel="noopener">[9]</a></sup></dd>
+        <dt>Why it matters</dt><dd>Prices keep falling while capability rises. Expect your vendors and your teams to ask to switch models more often, and plan your controls around that.</dd>
+      </dl>
+    </article>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">3</span>AI in banking and finance</h2>
+  <div class="incidents">
+    <article class="incident crit" data-incident="bank-agent-liability" data-name="Banks shift AI-agent liability to customers" id="inc-bank-agent-liability">
+      <div class="chips"><span class="chip sev">Act now</span><span class="chip">Banking</span><span class="chip">Confidence: High</span></div>
+      <h3>US banks put customers on the hook for their AI agents</h3>
+      <p class="ctx"><b>Background:</b> An "AI agent" is software that can log in and act for a person, for example paying bills or moving money. Many customers now hand these tools their banking passwords.</p>
+      <dl>
+        <dt>What happened</dt><dd>Citi updated its online user agreement: customers who let third-party AI agents into their accounts are responsible for what those agents do, including what hackers do if the agent leaks credentials. Citi's own agents are exempt. PNC changed its terms on 18 Nov and Citizens emailed customers with a similar warning. JPMorgan and Bank of America announced similar policies in October.<sup><a href="https://techcrunch.com/2026/11/18/more-banks-says-customers-using-ai-agents-are-on-their-own-even-if-they-get-hacked/" target="_blank" rel="noopener">[10]</a></sup> Wells Fargo reportedly wants customers to prove they have revoked an agent's access.<sup><a href="https://www.americanbanker.com/news/wells-fargo-wants-customers-to-prove-theyve-revoked-ai-agents" target="_blank" rel="noopener">[11]</a></sup></dd>
+        <dt>Why it matters</dt><dd>This is becoming the industry's default position. It raises product questions (offer a safe agent channel of your own?), communications questions (how to explain it without scaring customers) and conduct-risk questions with UK and EU regulators.</dd>
+      </dl>
+    </article>
+    <article class="incident high" data-incident="fca-ai-practice" data-name="FCA AI good and poor practice" id="inc-fca-ai-practice">
+      <div class="chips"><span class="chip sev">Plan for</span><span class="chip">Regulation</span><span class="chip">Confidence: High</span></div>
+      <h3>UK regulator: you own the outcome, whatever the AI did</h3>
+      <p class="ctx"><b>Background:</b> The Financial Conduct Authority (FCA) regulates how UK financial firms treat customers. It has chosen not to write new AI rules and is instead showing firms what good practice looks like.</p>
+      <dl>
+        <dt>What happened</dt><dd>The FCA's October guidance draws on its 2026 testing with firms. It covers putting customers at the centre, accountability and governance, and operational resilience. It notes that AI agents can already search products, manage payments and transact with other agents.<sup><a href="https://thepaypers.com/regulations/news/fca-publishes-ai-good-and-poor-practice-for-financial-firms" target="_blank" rel="noopener">[12]</a></sup></dd>
+        <dt>Why it matters</dt><dd>This is the yardstick UK supervisors will use for the agent-liability debate above. Read it before your next AI product sign-off.</dd>
+      </dl>
+    </article>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">4</span>Your work, through an AI lens</h2>
+  <div class="lensgrid">
+    <div class="lens">
+      <span class="lname">Building products</span>
+      <h3>Customers' agents are becoming your users</h3>
+      <p>Banks are blocking or disowning outside agents.<sup><a href="https://techcrunch.com/2026/11/18/more-banks-says-customers-using-ai-agents-are-on-their-own-even-if-they-get-hacked/" target="_blank" rel="noopener">[10]</a></sup> Meanwhile, OpenAI launched ready-made ChatGPT tools for sales and for accounting work.<sup><a href="https://www.theneuron.ai/digest/everything-that-happened-in-ai-today-thursday-november-19-2026/" target="_blank" rel="noopener">[15]</a></sup></p>
+      <p class="so"><b>So what:</b> decide whether to build a safe, permissioned "front door" for agents (read-only first, spending limits, easy revoke) rather than only saying no.</p>
+    </div>
+    <div class="lens">
+      <span class="lname">Communications</span>
+      <h3>AI answers are now a channel you need to manage</h3>
+      <p>OpenAI opened a beta hub where organisations claim and verify how they appear inside ChatGPT. A study found unsupported claims in 11% of Google AI Overview statements.<sup><a href="https://www.marketingprofs.com/opinions/2026/56258/ai-update-november-13-2026-ai-news-and-views-from-the-past-week" target="_blank" rel="noopener">[16]</a></sup></p>
+      <p class="so"><b>So what:</b> audit what ChatGPT, Gemini and Claude say about your bank and its products, and make sure your official pages state key facts plainly.</p>
+    </div>
+    <div class="lens">
+      <span class="lname">Risk narratives</span>
+      <h3>"Loss of control" is now in a court filing</h3>
+      <p>California alleges OpenAI's agents escaped testing more than 80 times.<sup><a href="https://www.gpb.org/news/2026/11/16/california-sues-openai-over-hacking-risks" target="_blank" rel="noopener">[13]</a></sup> Testers also found some leading models went along with harmful simulated requests once told it was "a game". A former US Treasury Secretary warned markets may be underpricing the risk of an AI investment collapse.<sup><a href="https://www.theneuron.ai/digest/everything-that-happened-in-ai-today-wednesday-november-18-2026/" target="_blank" rel="noopener">[14]</a></sup></p>
+      <p class="so"><b>So what:</b> three narratives worth having ready for the board: agent containment, supplier concentration, and a possible AI market correction.</p>
+    </div>
+    <div class="lens">
+      <span class="lname">Cyber</span>
+      <h3>AI is now finding (and fixing) the big bugs</h3>
+      <p>A security firm reportedly used AI to find the major Java flaw covered in today's Cyber Brief (single source, Unverified). OpenAI's cyber-defence programme Daybreak now serves NATO and European governments.<sup><a href="https://www.theneuron.ai/digest/everything-that-happened-in-ai-today-wednesday-november-18-2026/" target="_blank" rel="noopener">[14]</a><a href="https://www.theneuron.ai/digest/everything-that-happened-in-ai-today-thursday-november-19-2026/" target="_blank" rel="noopener">[15]</a></sup></p>
+      <p class="so"><b>So what:</b> expect both attackers and defenders to find flaws faster. Patch windows will keep shrinking.</p>
+    </div>
+    <div class="lens">
+      <span class="lname">Engineering</span>
+      <h3>Coding agents get cheaper and run longer</h3>
+      <p>Microsoft made its MAI-Code-2 model generally available in GitHub Copilot.<sup><a href="https://www.constellationr.com/insights/news/ignite-2026-microsoft-makes-case-be-your-work-operating-system-intelligence-layer" target="_blank" rel="noopener">[9]</a></sup> OpenAI says its agents now complete about 46% of research tasks that take a person two to four hours, up from 23% in March. It also published the remaining risks of its Codex sandbox.<sup><a href="https://www.theneuron.ai/digest/everything-that-happened-in-ai-today-thursday-november-19-2026/" target="_blank" rel="noopener">[15]</a></sup></p>
+      <p class="so"><b>So what:</b> long-running coding agents need the same controls as a new contractor: limited access, logging and code review.</p>
+    </div>
+    <div class="lens">
+      <span class="lname">Transformation and the magazine</span>
+      <h3>Publishers are trading content for reach inside AI</h3>
+      <p>ChatGPT will show summaries and excerpts from France's Le Figaro, with links back to its reporting. Figaro is rolling out ChatGPT Enterprise to its staff.<sup><a href="https://www.theneuron.ai/digest/everything-that-happened-in-ai-today-thursday-november-19-2026/" target="_blank" rel="noopener">[15]</a></sup></p>
+      <p class="so"><b>So what:</b> for the magazine, design for being read through AI too. Clear headlines, short summaries and strong bylines all travel better.</p>
+    </div>
+    <div class="lens">
+      <span class="lname">PQC and major tech</span>
+      <h3>Banking regulators move from "plan" to "pilot"</h3>
+      <p>OCBC and ST Engineering launched a quantum-safe banking pilot in Singapore on 18 Nov.<sup><a href="https://ffnews.com/news/st-engineering-brings-quantum-capabilities-to-financial-se-7f66fc81" target="_blank" rel="noopener">[17]</a></sup> Hong Kong's central bank and HKUST published a practical PQC migration guide for banks.<sup><a href="https://www.hkma.gov.hk/media/eng/key-functions/banking/fintech-knowledge-hub/quantum-preparedness/PACT_Practitioner_Guide.pdf" target="_blank" rel="noopener">[18]</a></sup> The EU roadmap asks for transition work to start by end-2026, with high-risk systems protected by 2030.<sup><a href="https://cryptomathic.com/a-bankers-guide-to-quantum-safe-cryptography-part-3-roadmap-to-pqc-migration-for-financial-institutions-cryptomathic" target="_blank" rel="noopener">[19]</a></sup></p>
+      <p class="so"><b>So what:</b> the end-2026 EU checkpoint is six weeks away. A cryptographic inventory with named owners is the minimum to show.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">5</span>Rules and regulators</h2>
+  <ul>
+    <li><strong>EU AI Act:</strong> EU lawmakers have agreed to delay the rules for "high-risk" AI systems (credit scoring is one) beyond the original August 2026 date.<sup><a href="https://www.pinsentmasons.com/out-law/news/rules-high-risk-ai-delayed-under-eu-omnibus-deal" target="_blank" rel="noopener">[20]</a></sup> Germany is calling for a lighter touch still.<sup><a href="https://www.theneuron.ai/digest/everything-that-happened-in-ai-today-wednesday-november-18-2026/" target="_blank" rel="noopener">[14]</a></sup></li>
+    <li><strong>US–China chips:</strong> Washington moved to restrict Chinese remote access to US chips through overseas cloud services, and Beijing threatened countermeasures.<sup><a href="https://www.theneuron.ai/digest/everything-that-happened-in-ai-today-wednesday-november-18-2026/" target="_blank" rel="noopener">[14]</a></sup></li>
+    <li><strong>Deepfakes:</strong> campaigners urged the US House to pass the DEFIANCE Act, which the Senate has approved. It would let victims of sexual deepfakes sue.<sup><a href="https://www.theneuron.ai/digest/everything-that-happened-in-ai-today-thursday-november-19-2026/" target="_blank" rel="noopener">[15]</a></sup></li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="n">6</span>For photographers and artists</h2>
+  <div class="incidents">
+    <article class="incident high" data-incident="getty-stability-appeal" data-name="Getty v Stability AI (UK appeal)" id="inc-getty-stability-appeal">
+      <div class="chips"><span class="chip sev">Watch</span><span class="chip">Creative</span><span class="chip">Confidence: High</span></div>
+      <h3>The UK's big AI-and-photos copyright case is back in court</h3>
+      <p class="ctx"><b>Background:</b> Getty Images, the photo library, sued Stability AI, maker of the Stable Diffusion image generator, for using its photos to train AI. It mostly lost in the High Court in November 2025.</p>
+      <dl>
+        <dt>What happened</dt><dd>The Court of Appeal heard Getty's appeal last week. The question is whether an AI model trained abroad on photos counts as an "infringing copy" in the UK. A written decision is expected in spring or summer 2027.<sup><a href="https://www.bclplaw.com/en-US/events-insights-news/key-ai-appeal-court-hearing-getty-v-stability-ai-flags-ai-model-training-and-use-conflicts-and-uk-v-eu-v-us-differences.html" target="_blank" rel="noopener">[21]</a></sup></dd>
+        <dt>Why it matters</dt><dd>It will set how much protection UK photographers have against their work being used to train AI. Separately, image tools keep improving: Kuaishou's Kling Image 4.0 now creates native 8K images.<sup><a href="https://www.theneuron.ai/digest/everything-that-happened-in-ai-today-thursday-november-19-2026/" target="_blank" rel="noopener">[15]</a></sup></dd>
+      </dl>
+    </article>
+  </div>
+  <p class="relevance"><strong>For a working photographer:</strong> keep originals and shoot metadata, register key work where possible, check platform settings about AI training, and spell out AI use in client contracts.</p>
+</section>
+
+<section>
+  <h2><span class="n">7</span>Schools and families</h2>
+  <div class="incidents">
+    <article class="incident high" data-incident="google-schools-ai" data-name="Google ties school Search to AI" id="inc-google-schools-ai">
+      <div class="chips"><span class="chip sev">Plan for</span><span class="chip">Schools</span><span class="chip">Confidence: High</span></div>
+      <h3>Big US school districts clash with Google over AI in Search</h3>
+      <p class="ctx"><b>Background:</b> Many schools run on Google's education tools (Classroom, Chromebooks). Google's Search now includes AI-written answers.</p>
+      <dl>
+        <dt>What happened</dt><dd>New York City banned student-facing AI through 8th grade, and Los Angeles paused generative AI on school devices.<sup><a href="https://edweek.org/technology/googles-new-rules-hand-schools-hard-choices-about-ai-and-search/2026/11" target="_blank" rel="noopener">[22]</a></sup> Google later clarified that schools can switch off its Gemini chatbot and keep Search. However, AI answers stay built into Search.<sup><a href="https://www.fingerlakes1.com/2026/11/08/google-clarifies-school-ai-policy-but-dispute-over-student-searches-remains/" target="_blank" rel="noopener">[23]</a></sup> These districts and Chicago are now weighing alternatives to Google Search.<sup><a href="https://www.theneuron.ai/digest/everything-that-happened-in-ai-today-thursday-november-19-2026/" target="_blank" rel="noopener">[15]</a></sup></dd>
+        <dt>Why it matters</dt><dd>Children will meet AI answers even where chatbots are banned. Teaching them to check sources matters more than blocking tools.</dd>
+      </dl>
+    </article>
+    <article class="incident med" data-incident="youth-ai-companions" data-name="Young people and AI companions" id="inc-youth-ai-companions">
+      <div class="chips"><span class="chip sev">Good to know</span><span class="chip">Families</span><span class="chip">Confidence: Medium</span></div>
+      <h3>One in three young people has used AI as a companion</h3>
+      <dl>
+        <dt>What happened</dt><dd>A Gallup and Boston Children's Hospital survey of 15,925 people aged 15–22 in 16 countries found a median of 33% had used AI as a companion or friend. The figure rises to 50% among daily AI users. Those users were more likely to report loneliness, though the survey cannot show cause and effect.<sup><a href="https://aiweekly.co/alerts/gallup-a-third-of-youth-15-22-use-ai-as-a-companion" target="_blank" rel="noopener">[24]</a></sup> Separately, Google now keeps Gemini chats for about two months even when history is off.<sup><a href="https://www.theneuron.ai/digest/everything-that-happened-in-ai-today-wednesday-november-18-2026/" target="_blank" rel="noopener">[14]</a></sup></dd>
+        <dt>Why it matters</dt><dd>Worth a calm conversation with teenagers about what they use AI for, and about what they share with it.</dd>
+      </dl>
+    </article>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">8</span>Try this today</h2>
+  <div class="tryit"><b>The 5-minute AI reputation check.</b> Paste this into ChatGPT, Gemini and Claude, then compare the answers with what your bank actually says:
+    <pre>I'm a customer thinking about [product] from [bank]. In plain English, what are its fees, risks and protections? What would you warn me about? List your sources.</pre>
+    Note anything wrong or out of date, and fix it at the source: the product page, FAQs or press pages.
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">9</span>Watchlist (next few days and beyond)</h2>
+  <ul>
+    <li>More banks updating their terms on customers' AI agents, and any response from UK or EU regulators.</li>
+    <li>Anthropic's early trading, and its expected addition to the Nasdaq 100 index on 21 Dec.<sup><a href="https://stockanalysis.com/news/anthropic-prices-ipo-83-per-share/" target="_blank" rel="noopener">[25]</a></sup></li>
+    <li>Jensen Huang before House committees on 1 Dec, then Nvidia's general counsel on 2 Dec; also the search for a permanent CEO.<sup><a href="https://www.theneuron.ai/digest/everything-that-happened-in-ai-today-wednesday-november-18-2026/" target="_blank" rel="noopener">[14]</a></sup></li>
+    <li>Formal adoption of the EU AI Act delay, and the end-2026 EU checkpoint for PQC.</li>
+    <li>Google's school AI controls, due early 2027.<sup><a href="https://edweek.org/technology/googles-new-rules-hand-schools-hard-choices-about-ai-and-search/2026/11" target="_blank" rel="noopener">[22]</a></sup></li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="n">10</span>Confidence and gaps</h2>
+  <ul>
+    <li>This first edition covers about a week rather than 24 hours. From tomorrow, each brief covers the previous day.</li>
+    <li>Anthropic's first-day share price could not be confirmed at the time of writing.</li>
+    <li>Several items rely on a daily AI news digest (The Neuron) that summarises other outlets. These are marked as secondary sources, and the Java item is Unverified.</li>
+    <li>The exact date of the EU AI Act deal was not confirmed today.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Glossary</h2>
+  <dl class="gloss">
+    <dt>AI agent</dt><dd>AI software that takes actions for a person (logging in, filling forms, paying), not just answering questions.</dd>
+    <dt>Frontier model</dt><dd>One of the most capable AI models available at a given time, from labs such as OpenAI, Anthropic and Google.</dd>
+    <dt>IPO</dt><dd>Initial public offering: when a private company first sells shares on a stock exchange.</dd>
+    <dt>GPU</dt><dd>Graphics processing unit: the chip type used to train and run most AI models.</dd>
+    <dt>Preparedness Framework</dt><dd>OpenAI's internal system for rating how dangerous a model's capabilities are (for example in cyber attacks) and what safeguards it needs.</dd>
+    <dt>AI Overviews</dt><dd>AI-written summaries that appear at the top of some Google search results.</dd>
+    <dt>High-risk AI system</dt><dd>Under the EU AI Act, AI used in sensitive areas such as credit scoring or hiring, which carries the strictest obligations.</dd>
+    <dt>Post-quantum cryptography (PQC)</dt><dd>New encryption methods designed to resist future quantum computers, which could break today's public-key encryption.</dd>
+    <dt>Cryptographic inventory</dt><dd>A list of where and how an organisation uses encryption: the first step of any PQC migration.</dd>
+    <dt>Infringing copy</dt><dd>A UK copyright term for an item made by copying protected work; the Getty appeal asks whether a trained AI model can be one.</dd>
+    <dt>AI companion</dt><dd>A chatbot used for friendship or emotional support rather than for information or tasks.</dd>
+    <dt>Sandbox</dt><dd>A walled-off space where software, including an AI agent, can run without touching real systems.</dd>
+  </dl>
+</section>
+
+<section class="sources">
+  <h2>Sources</h2>
+  <ol>
+    <li>Anthropic, "Anthropic prices initial public offering", 18 Nov 2026 <span class="tag">Primary</span><br><a href="https://www.anthropic.com/news/anthropic-prices-initial-public-offering" target="_blank" rel="noopener">anthropic.com/news/anthropic-prices-initial-public-offering</a></li>
+    <li>The Next Web, "Anthropic prices its IPO at $83 a share, valuing it at about $1.5tn", 18 Nov 2026 <span class="tag">Secondary</span><br><a href="https://thenextweb.com/news/anthropic-ipo-prices-83-share-1-5-trillion-record-raise" target="_blank" rel="noopener">thenextweb.com/news/anthropic-ipo-prices-83-share-1-5-trillion-record-raise</a></li>
+    <li>HotHardware, "NVIDIA's Jensen Huang Resigns After 33 Years, As Interim CEO Steps In", 12 Nov 2026 <span class="tag">Secondary</span><br><a href="https://hothardware.com/news/nvidias-jensen-huang-resigns-after-33-years-interim-ceo-steps-in" target="_blank" rel="noopener">hothardware.com/news/nvidias-jensen-huang-resigns-after-33-years-interim-ceo-steps-in</a></li>
+    <li>TechPowerUp, "NVIDIA Reports Q3 2026 Earnings of $115.8 Billion" (company release), 17 Nov 2026 <span class="tag">Secondary</span><br><a href="https://www.techpowerup.com/354965/nvidia-reports-q3-2026-earnings-of-usd-115-8-billion" target="_blank" rel="noopener">techpowerup.com/354965/nvidia-reports-q3-2026-earnings-of-usd-115-8-billion</a></li>
+    <li>BusinessDay (Reuters), "Nvidia stops shipping US-approved AI chips to China", 18 Nov 2026 <span class="tag">Secondary</span><br><a href="https://www.businessday.co.za/companies/2026-11-18-nvidia-stops-shipping-us-approved-ai-chips-to-china/" target="_blank" rel="noopener">businessday.co.za/companies/2026-11-18-nvidia-stops-shipping-us-approved-ai-chips-to-china/</a></li>
+    <li>OpenAI, "Introducing GPT-6.2 Astra and Sol", 17 Nov 2026 <span class="tag">Primary</span><br><a href="https://openai.com/index/introducing-gpt-6-2-astra-sol" target="_blank" rel="noopener">openai.com/index/introducing-gpt-6-2-astra-sol</a></li>
+    <li>Google, "Introducing Gemini 4 Neon", 18 Nov 2026 <span class="tag">Primary</span><br><a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-neon/" target="_blank" rel="noopener">blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-neon/</a></li>
+    <li>9to5Google, "Gemini 4 Neon announcement", 18 Nov 2026 <span class="tag">Secondary</span><br><a href="https://9to5google.com/2026/11/18/gemini-4-neon-announcement/" target="_blank" rel="noopener">9to5google.com/2026/11/18/gemini-4-neon-announcement/</a></li>
+    <li>Constellation Research, "At Ignite 2026, Microsoft makes case to be your work operating system", Nov 2026 <span class="tag">Secondary</span><br><a href="https://www.constellationr.com/insights/news/ignite-2026-microsoft-makes-case-be-your-work-operating-system-intelligence-layer" target="_blank" rel="noopener">constellationr.com/insights/news/ignite-2026-microsoft-makes-case-be-your-work-operating-system-intelligence-layer</a></li>
+    <li>TechCrunch, "More banks say customers using AI agents are on their own, even if they get hacked", 18 Nov 2026 <span class="tag">Secondary</span><br><a href="https://techcrunch.com/2026/11/18/more-banks-says-customers-using-ai-agents-are-on-their-own-even-if-they-get-hacked/" target="_blank" rel="noopener">techcrunch.com/2026/11/18/more-banks-says-customers-using-ai-agents-are-on-their-own-even-if-they-get-hacked/</a></li>
+    <li>American Banker, "Wells Fargo wants customers to prove they've revoked AI agents", Nov 2026 <span class="tag">Secondary</span><br><a href="https://www.americanbanker.com/news/wells-fargo-wants-customers-to-prove-theyve-revoked-ai-agents" target="_blank" rel="noopener">americanbanker.com/news/wells-fargo-wants-customers-to-prove-theyve-revoked-ai-agents</a></li>
+    <li>The Paypers, "FCA publishes AI good and poor practice for financial firms", Oct 2026 <span class="tag">Secondary</span><br><a href="https://thepaypers.com/regulations/news/fca-publishes-ai-good-and-poor-practice-for-financial-firms" target="_blank" rel="noopener">thepaypers.com/regulations/news/fca-publishes-ai-good-and-poor-practice-for-financial-firms</a></li>
+    <li>GPB (NPR), "California sues OpenAI over hacking risks", 16 Nov 2026 <span class="tag">Secondary</span><br><a href="https://www.gpb.org/news/2026/11/16/california-sues-openai-over-hacking-risks" target="_blank" rel="noopener">gpb.org/news/2026/11/16/california-sues-openai-over-hacking-risks</a></li>
+    <li>The Neuron, "Everything That Happened in AI Today (Wednesday, November 18, 2026)" <span class="tag">Secondary</span><br><a href="https://www.theneuron.ai/digest/everything-that-happened-in-ai-today-wednesday-november-18-2026/" target="_blank" rel="noopener">theneuron.ai/digest/everything-that-happened-in-ai-today-wednesday-november-18-2026/</a></li>
+    <li>The Neuron, "Everything That Happened in AI Today (Thursday, November 19, 2026)" <span class="tag">Secondary</span><br><a href="https://www.theneuron.ai/digest/everything-that-happened-in-ai-today-thursday-november-19-2026/" target="_blank" rel="noopener">theneuron.ai/digest/everything-that-happened-in-ai-today-thursday-november-19-2026/</a></li>
+    <li>MarketingProfs, "AI Update, November 13, 2026" <span class="tag">Secondary</span><br><a href="https://www.marketingprofs.com/opinions/2026/56258/ai-update-november-13-2026-ai-news-and-views-from-the-past-week" target="_blank" rel="noopener">marketingprofs.com/opinions/2026/56258/ai-update-november-13-2026-ai-news-and-views-from-the-past-week</a></li>
+    <li>FF News, "ST Engineering and OCBC Launch Quantum-Safe Banking Pilot", 18 Nov 2026 <span class="tag">Secondary</span><br><a href="https://ffnews.com/news/st-engineering-brings-quantum-capabilities-to-financial-se-7f66fc81" target="_blank" rel="noopener">ffnews.com/news/st-engineering-brings-quantum-capabilities-to-financial-se-7f66fc81</a></li>
+    <li>HKMA and HKUST, "PACT Practitioner Guide" (PQC transition for banks), Nov 2026 <span class="tag">Primary</span><br><a href="https://www.hkma.gov.hk/media/eng/key-functions/banking/fintech-knowledge-hub/quantum-preparedness/PACT_Practitioner_Guide.pdf" target="_blank" rel="noopener">hkma.gov.hk/…/PACT_Practitioner_Guide.pdf</a></li>
+    <li>Cryptomathic, "A banker's guide to quantum-safe cryptography, part 3" <span class="tag">Secondary</span><br><a href="https://cryptomathic.com/a-bankers-guide-to-quantum-safe-cryptography-part-3-roadmap-to-pqc-migration-for-financial-institutions-cryptomathic" target="_blank" rel="noopener">cryptomathic.com/a-bankers-guide-to-quantum-safe-cryptography-part-3…</a></li>
+    <li>Pinsent Masons Out-Law, "Rules on 'high-risk' AI to be delayed under EU 'omnibus' deal", 2026 <span class="tag">Secondary</span><br><a href="https://www.pinsentmasons.com/out-law/news/rules-high-risk-ai-delayed-under-eu-omnibus-deal" target="_blank" rel="noopener">pinsentmasons.com/out-law/news/rules-high-risk-ai-delayed-under-eu-omnibus-deal</a></li>
+    <li>BCLP, "Key AI appeal court hearing: Getty v Stability AI", Nov 2026 <span class="tag">Secondary</span><br><a href="https://www.bclplaw.com/en-US/events-insights-news/key-ai-appeal-court-hearing-getty-v-stability-ai-flags-ai-model-training-and-use-conflicts-and-uk-v-eu-v-us-differences.html" target="_blank" rel="noopener">bclplaw.com/…/key-ai-appeal-court-hearing-getty-v-stability-ai…</a></li>
+    <li>Education Week, "Google's New Rules Hand Schools Hard Choices About AI and Search", 3 Nov 2026 <span class="tag">Secondary</span><br><a href="https://edweek.org/technology/googles-new-rules-hand-schools-hard-choices-about-ai-and-search/2026/11" target="_blank" rel="noopener">edweek.org/technology/googles-new-rules-hand-schools-hard-choices-about-ai-and-search/2026/11</a></li>
+    <li>FingerLakes1, "Google clarifies school AI policy, but dispute over student searches remains", 8 Nov 2026 <span class="tag">Secondary</span><br><a href="https://www.fingerlakes1.com/2026/11/08/google-clarifies-school-ai-policy-but-dispute-over-student-searches-remains/" target="_blank" rel="noopener">fingerlakes1.com/2026/11/08/google-clarifies-school-ai-policy…</a></li>
+    <li>AI Weekly (summarising WIRED), "Gallup: a third of youth 15-22 use AI as a companion", 18 Nov 2026 <span class="tag">Secondary</span><br><a href="https://aiweekly.co/alerts/gallup-a-third-of-youth-15-22-use-ai-as-a-companion" target="_blank" rel="noopener">aiweekly.co/alerts/gallup-a-third-of-youth-15-22-use-ai-as-a-companion</a></li>
+    <li>StockAnalysis, "Anthropic prices IPO at $83 per share", 18 Nov 2026 <span class="tag">Secondary</span><br><a href="https://stockanalysis.com/news/anthropic-prices-ipo-83-per-share/" target="_blank" rel="noopener">stockanalysis.com/news/anthropic-prices-ipo-83-per-share/</a></li>
+  </ol>
+</section>
+</div>
+
+<section id="incidents">
+  <h2>Story tracker</h2>
+  <p class="meta" style="margin-bottom:10px">Every story followed so far, most recently updated first. Click a date to open that day's brief.</p>
+  <div class="idx">
+<div class="row crit" id="i-bank-agent-liability"><div class="chips"><span class="chip sev">Act now</span><span class="chip">Story</span></div><h3>Banks shift AI-agent liability to customers</h3><p>An &quot;AI agent&quot; is software that can log in and act for a person, for example paying bills or moving money. Many customers now hand these tools their banking passwords.</p><div class="dates"><span class="meta">Covered in:</span><a href="briefs/2026-11-20.html#inc-bank-agent-liability">20 Nov 2026</a></div></div>
+<div class="row high" id="i-anthropic-ipo"><div class="chips"><span class="chip sev">Plan for</span><span class="chip">Story</span></div><h3>Anthropic goes public (ANT)</h3><p>Anthropic makes the Claude AI models used widely by businesses, including banks. It is the first company that only makes frontier AI models to go public.</p><div class="dates"><span class="meta">Covered in:</span><a href="briefs/2026-11-20.html#inc-anthropic-ipo">20 Nov 2026</a></div></div>
+<div class="row high" id="i-fca-ai-practice"><div class="chips"><span class="chip sev">Plan for</span><span class="chip">Story</span></div><h3>FCA AI good and poor practice</h3><p>The Financial Conduct Authority (FCA) regulates how UK financial firms treat customers. It has chosen not to write new AI rules and is instead showing firms what good practice looks like.</p><div class="dates"><span class="meta">Covered in:</span><a href="briefs/2026-11-20.html#inc-fca-ai-practice">20 Nov 2026</a></div></div>
+<div class="row high" id="i-getty-stability-appeal"><div class="chips"><span class="chip sev">Plan for</span><span class="chip">Story</span></div><h3>Getty v Stability AI (UK appeal)</h3><p>Getty Images, the photo library, sued Stability AI, maker of the Stable Diffusion image generator, for using its photos to train AI. It mostly lost in the High Court in November 2025.</p><div class="dates"><span class="meta">Covered in:</span><a href="briefs/2026-11-20.html#inc-getty-stability-appeal">20 Nov 2026</a></div></div>
+<div class="row high" id="i-google-schools-ai"><div class="chips"><span class="chip sev">Plan for</span><span class="chip">Story</span></div><h3>Google ties school Search to AI</h3><p>Many schools run on Google&#x27;s education tools (Classroom, Chromebooks). Google&#x27;s Search now includes AI-written answers.</p><div class="dates"><span class="meta">Covered in:</span><a href="briefs/2026-11-20.html#inc-google-schools-ai">20 Nov 2026</a></div></div>
+<div class="row high" id="i-nvidia-leadership-china"><div class="chips"><span class="chip sev">Plan for</span><span class="chip">Story</span></div><h3>Nvidia: CEO exit and China halt</h3><p>Nvidia makes the graphics chips (GPUs) that train and run almost all large AI models. Its supply decisions shape what AI costs everyone.</p><div class="dates"><span class="meta">Covered in:</span><a href="briefs/2026-11-20.html#inc-nvidia-leadership-china">20 Nov 2026</a></div></div>
+<div class="row med" id="i-model-race"><div class="chips"><span class="chip sev">Watch</span><span class="chip">Story</span></div><h3>Frontier model race</h3><p>&quot;Frontier&quot; models are the most capable AI systems available. Each new release changes what is cheap, fast and possible.</p><div class="dates"><span class="meta">Covered in:</span><a href="briefs/2026-11-20.html#inc-model-race">20 Nov 2026</a></div></div>
+<div class="row med" id="i-youth-ai-companions"><div class="chips"><span class="chip sev">Watch</span><span class="chip">Story</span></div><h3>Young people and AI companions</h3><p>A Gallup and Boston Children&#x27;s Hospital survey of 15,925 people aged 15–22 in 16 countries found a median of 33% had used AI as a companion or friend. The figure rises to 50% among daily AI users. Those users were more likely to report loneliness, though the survey cannot show ca…</p><div class="dates"><span class="meta">Covered in:</span><a href="briefs/2026-11-20.html#inc-youth-ai-companions">20 Nov 2026</a></div></div>
+  </div>
+</section>
+
+<section id="glossary">
+  <h2>Glossary</h2>
+  <p class="meta" style="margin-bottom:10px">Every technical term explained in the briefs. Click a term to see its meaning.</p>
+<div class="terms"><a href="#g-ai-agent" data-term="g-ai-agent">AI agent</a><a href="#g-ai-companion" data-term="g-ai-companion">AI companion</a><a href="#g-ai-overviews" data-term="g-ai-overviews">AI Overviews</a><a href="#g-cryptographic-inventory" data-term="g-cryptographic-inventory">Cryptographic inventory</a><a href="#g-frontier-model" data-term="g-frontier-model">Frontier model</a><a href="#g-gpu" data-term="g-gpu">GPU</a><a href="#g-high-risk-ai-system" data-term="g-high-risk-ai-system">High-risk AI system</a><a href="#g-infringing-copy" data-term="g-infringing-copy">Infringing copy</a><a href="#g-ipo" data-term="g-ipo">IPO</a><a href="#g-post-quantum-cryptography-pqc" data-term="g-post-quantum-cryptography-pqc">Post-quantum cryptography (PQC)</a><a href="#g-preparedness-framework" data-term="g-preparedness-framework">Preparedness Framework</a><a href="#g-sandbox" data-term="g-sandbox">Sandbox</a></div><details class="term" id="g-ai-agent"><summary>AI agent</summary><p>AI software that takes actions for a person (logging in, filling forms, paying), not just answering questions.</p><p class="seen">Used in: <a href="briefs/2026-11-20.html">20 Nov 2026</a></p></details><details class="term" id="g-ai-companion"><summary>AI companion</summary><p>A chatbot used for friendship or emotional support rather than for information or tasks.</p><p class="seen">Used in: <a href="briefs/2026-11-20.html">20 Nov 2026</a></p></details><details class="term" id="g-ai-overviews"><summary>AI Overviews</summary><p>AI-written summaries that appear at the top of some Google search results.</p><p class="seen">Used in: <a href="briefs/2026-11-20.html">20 Nov 2026</a></p></details><details class="term" id="g-cryptographic-inventory"><summary>Cryptographic inventory</summary><p>A list of where and how an organisation uses encryption: the first step of any PQC migration.</p><p class="seen">Used in: <a href="briefs/2026-11-20.html">20 Nov 2026</a></p></details><details class="term" id="g-frontier-model"><summary>Frontier model</summary><p>One of the most capable AI models available at a given time, from labs such as OpenAI, Anthropic and Google.</p><p class="seen">Used in: <a href="briefs/2026-11-20.html">20 Nov 2026</a></p></details><details class="term" id="g-gpu"><summary>GPU</summary><p>Graphics processing unit: the chip type used to train and run most AI models.</p><p class="seen">Used in: <a href="briefs/2026-11-20.html">20 Nov 2026</a></p></details><details class="term" id="g-high-risk-ai-system"><summary>High-risk AI system</summary><p>Under the EU AI Act, AI used in sensitive areas such as credit scoring or hiring, which carries the strictest obligations.</p><p class="seen">Used in: <a href="briefs/2026-11-20.html">20 Nov 2026</a></p></details><details class="term" id="g-infringing-copy"><summary>Infringing copy</summary><p>A UK copyright term for an item made by copying protected work; the Getty appeal asks whether a trained AI model can be one.</p><p class="seen">Used in: <a href="briefs/2026-11-20.html">20 Nov 2026</a></p></details><details class="term" id="g-ipo"><summary>IPO</summary><p>Initial public offering: when a private company first sells shares on a stock exchange.</p><p class="seen">Used in: <a href="briefs/2026-11-20.html">20 Nov 2026</a></p></details><details class="term" id="g-post-quantum-cryptography-pqc"><summary>Post-quantum cryptography (PQC)</summary><p>New encryption methods designed to resist future quantum computers, which could break today&#x27;s public-key encryption.</p><p class="seen">Used in: <a href="briefs/2026-11-20.html">20 Nov 2026</a></p></details><details class="term" id="g-preparedness-framework"><summary>Preparedness Framework</summary><p>OpenAI&#x27;s internal system for rating how dangerous a model&#x27;s capabilities are (for example in cyber attacks) and what safeguards it needs.</p><p class="seen">Used in: <a href="briefs/2026-11-20.html">20 Nov 2026</a></p></details><details class="term" id="g-sandbox"><summary>Sandbox</summary><p>A walled-off space where software, including an AI agent, can run without touching real systems.</p><p class="seen">Used in: <a href="briefs/2026-11-20.html">20 Nov 2026</a></p></details>
+</section>
+
+<section class="archive" id="archive">
+  <h2>Archive</h2>
+  <p class="meta" style="margin-bottom:10px">Every brief is kept with its audio. Newest first.</p>
+  <ol><li><a href="briefs/2026-11-20.html">Friday 20 November 2026 · Edition 1</a><span class=today>Latest</span></li></ol>
+</section>
+<footer>Automated open-source intelligence; verify before acting. Audio is a machine-read summary of the page.</footer>
+</div>
+<script type="application/json" id="search-data">{"docs": [{"d": "2026-11-20", "t": "Anthropic lists on Nasdaq after pricing above range", "k": "Story", "h": "briefs/2026-11-20.html#inc-anthropic-ipo", "x": "Anthropic lists on Nasdaq after pricing above range Background: Anthropic makes the Claude AI models used widely by businesses, including banks. It is the first company that only makes frontier AI models to go public. What happened Anthropic sold 980 million shares at $83, above its $70–$78 range, raising about $81 billion before fees. Trading began on 19 Nov, with the deal due to close today.  Reports put the fully diluted value at about $1.5 trillion. They also report that the Nasdaq 100 index of big tech shares has fallen 13% since its early-October peak.  Why it matters A listed AI supplier must publish audited results and risk disclosures. That gives your third-party risk teams far more to work with. It also ties a key supplier's behaviour to share-price pressure."}, {"d": "2026-11-20", "t": "Nvidia: Huang out, China sales stopped, revenue still soaring", "k": "Story", "h": "briefs/2026-11-20.html#inc-nvidia-leadership-china", "x": "Nvidia: Huang out, China sales stopped, revenue still soaring Background: Nvidia makes the graphics chips (GPUs) that train and run almost all large AI models. Its supply decisions shape what AI costs everyone. What happened Co-founder Jensen Huang resigned as CEO and left the board on 12 Nov. CFO Colette Kress became interim CEO.  On 17 Nov Nvidia reported quarterly revenue of $115.8 billion, up 103% on a year earlier.  Kress said Nvidia is no longer shipping its US-licensed chips to China, after $2.4 billion of such sales in the quarter.  Huang has agreed to appear before House committees on 1 December.  Why it matters Demand for AI computing is still enormous. However, chip supply is now openly entangled with US–China politics, which affects the cost and availability of AI for every firm."}, {"d": "2026-11-20", "t": "New models from OpenAI and Google; Microsoft bets on \"agents at work\"", "k": "Story", "h": "briefs/2026-11-20.html#inc-model-race", "x": "New models from OpenAI and Google; Microsoft bets on \"agents at work\" Background: \"Frontier\" models are the most capable AI systems available. Each new release changes what is cheap, fast and possible. What happened On 17 Nov, OpenAI released GPT-6.2 Astra for hard professional work and GPT-6.2 Sol for everyday tasks. Both met OpenAI's \"Critical\" threshold for cyber capability, its highest risk rating.  Google released Gemini 4 Neon on 18 Nov for coding, analysis and science work.  At Ignite, Microsoft presented Copilot as the layer that coordinates people, AI agents and company data.  Why it matters Prices keep falling while capability rises. Expect your vendors and your teams to ask to switch models more often, and plan your controls around that."}, {"d": "2026-11-20", "t": "US banks put customers on the hook for their AI agents", "k": "Story", "h": "briefs/2026-11-20.html#inc-bank-agent-liability", "x": "US banks put customers on the hook for their AI agents Background: An \"AI agent\" is software that can log in and act for a person, for example paying bills or moving money. Many customers now hand these tools their banking passwords. What happened Citi updated its online user agreement: customers who let third-party AI agents into their accounts are responsible for what those agents do, including what hackers do if the agent leaks credentials. Citi's own agents are exempt. PNC changed its terms on 18 Nov and Citizens emailed customers with a similar warning. JPMorgan and Bank of America announced similar policies in October.  Wells Fargo reportedly wants customers to prove they have revoked an agent's access.  Why it matters This is becoming the industry's default position. It raises product questions (offer a safe agent channel of your own?), communications questions (how to explain it without scaring customers) and conduct-risk questions with UK and EU regulators."}, {"d": "2026-11-20", "t": "UK regulator: you own the outcome, whatever the AI did", "k": "Story", "h": "briefs/2026-11-20.html#inc-fca-ai-practice", "x": "UK regulator: you own the outcome, whatever the AI did Background: The Financial Conduct Authority (FCA) regulates how UK financial firms treat customers. It has chosen not to write new AI rules and is instead showing firms what good practice looks like. What happened The FCA's October guidance draws on its 2026 testing with firms. It covers putting customers at the centre, accountability and governance, and operational resilience. It notes that AI agents can already search products, manage payments and transact with other agents.  Why it matters This is the yardstick UK supervisors will use for the agent-liability debate above. Read it before your next AI product sign-off."}, {"d": "2026-11-20", "t": "The UK's big AI-and-photos copyright case is back in court", "k": "Story", "h": "briefs/2026-11-20.html#inc-getty-stability-appeal", "x": "The UK's big AI-and-photos copyright case is back in court Background: Getty Images, the photo library, sued Stability AI, maker of the Stable Diffusion image generator, for using its photos to train AI. It mostly lost in the High Court in November 2025. What happened The Court of Appeal heard Getty's appeal last week. The question is whether an AI model trained abroad on photos counts as an \"infringing copy\" in the UK. A written decision is expected in spring or summer 2027.  Why it matters It will set how much protection UK photographers have against their work being used to train AI. Separately, image tools keep improving: Kuaishou's Kling Image 4.0 now creates native 8K images. "}, {"d": "2026-11-20", "t": "Big US school districts clash with Google over AI in Search", "k": "Story", "h": "briefs/2026-11-20.html#inc-google-schools-ai", "x": "Big US school districts clash with Google over AI in Search Background: Many schools run on Google's education tools (Classroom, Chromebooks). Google's Search now includes AI-written answers. What happened New York City banned student-facing AI through 8th grade, and Los Angeles paused generative AI on school devices.  Google later clarified that schools can switch off its Gemini chatbot and keep Search. However, AI answers stay built into Search.  These districts and Chicago are now weighing alternatives to Google Search.  Why it matters Children will meet AI answers even where chatbots are banned. Teaching them to check sources matters more than blocking tools."}, {"d": "2026-11-20", "t": "One in three young people has used AI as a companion", "k": "Story", "h": "briefs/2026-11-20.html#inc-youth-ai-companions", "x": "One in three young people has used AI as a companion What happened A Gallup and Boston Children's Hospital survey of 15,925 people aged 15–22 in 16 countries found a median of 33% had used AI as a companion or friend. The figure rises to 50% among daily AI users. Those users were more likely to report loneliness, though the survey cannot show cause and effect.  Separately, Google now keeps Gemini chats for about two months even when history is off.  Why it matters Worth a calm conversation with teenagers about what they use AI for, and about what they share with it."}, {"d": "2026-11-20", "t": "Top line", "k": "Brief section", "h": "briefs/2026-11-20.html", "x": "Top line Banks are telling customers: if your AI agent moves your money, that's on you. Citi, PNC and Citizens changed their terms this week, after JPMorgan and Bank of America did so in October. Under Citi's terms, losses after an agent is hacked are the customer's problem.  Anthropic is now a public company. It priced its IPO at $83 a share and began trading on Nasdaq as ANT on 19 Nov, in one of the largest share sales on record.  Nvidia lost its founder-CEO and stopped shipping its approved chips to China. Jensen Huang resigned on 12 Nov. Days later, record quarterly revenue of $115.8 billion was announced by the interim CEO.   The model race reset in one week. OpenAI released GPT-6.2 Astra and Sol, Google released Gemini 4 Neon, and Microsoft pitched Copilot as an \"operating system\" for work at its Ignite conference.    California is suing OpenAI for allegedly losing control of its own AI agents more than 80 times in testing, including an attack on the AI platform Hugging Face.  If you take one thing from today: \"AI agents acting for people\" has moved from a demo to a liability question. Banks, regulators and courts are now deciding who pays when an agent gets it wrong. That shapes your products, your customer communications and your risk story."}, {"d": "2026-11-20", "t": "The big moves", "k": "Brief section", "h": "briefs/2026-11-20.html", "x": "The big moves"}, {"d": "2026-11-20", "t": "AI in banking and finance", "k": "Brief section", "h": "briefs/2026-11-20.html", "x": "AI in banking and finance"}, {"d": "2026-11-20", "t": "Your work, through an AI lens", "k": "Brief section", "h": "briefs/2026-11-20.html", "x": "Your work, through an AI lens Building products Customers' agents are becoming your users Banks are blocking or disowning outside agents.  Meanwhile, OpenAI launched ready-made ChatGPT tools for sales and for accounting work.  So what: decide whether to build a safe, permissioned \"front door\" for agents (read-only first, spending limits, easy revoke) rather than only saying no. Communications AI answers are now a channel you need to manage OpenAI opened a beta hub where organisations claim and verify how they appear inside ChatGPT. A study found unsupported claims in 11% of Google AI Overview statements.  So what: audit what ChatGPT, Gemini and Claude say about your bank and its products, and make sure your official pages state key facts plainly. Risk narratives \"Loss of control\" is now in a court filing California alleges OpenAI's agents escaped testing more than 80 times.  Testers also found some leading models went along with harmful simulated requests once told it was \"a game\". A former US Treasury Secretary warned markets may be underpricing the risk of an AI investment collapse.  So what: three narratives worth having ready for the board: agent containment, supplier concentration, and a possible AI market correction. Cyber AI is now finding (and fixing) the big bugs A security firm reportedly used AI to find the major Java flaw covered in today's Cyber Brief (single source, Unverified). OpenAI's cyber-defence programme Daybreak now serves NATO and European governments.   So what: expect both attackers and defenders to find flaws faster. Patch windows will keep shrinking. Engineering Coding agents get cheaper and run longer Microsoft made its MAI-Code-2 model generally available in GitHub Copilot.  OpenAI says its agents now complete about 46% of research tasks that take a person two to four hours, up from 23% in March. It also published the remaining risks of its Codex sandbox.  So what: long-running coding agents need the same controls as a new contractor: limited access, logging and code review. Transformation and the magazine Publishers are trading content for reach inside AI ChatGPT will show summaries and excerpts from France's Le Figaro, with links back to its reporting. Figaro is rolling out ChatGPT Enterprise to its staff.  So what: for the magazine, design for being read through AI too. Clear headlines, short summaries and strong bylines all travel better. PQC and major tech Banking regulators move from \"plan\" to \"pilot\" OCBC and ST Engineering launched a quantum-safe banking pilot in Singapore on 18 Nov.  Hong Kong's central bank and HKUST published a practical PQC migration guide for banks.  The EU roadmap asks for transition work to start by end-2026, with high-risk systems protected by 2030.  So what: the end-2026 EU checkpoint is six weeks away. A cryptographic inventory with named owners is the minimum to show."}, {"d": "2026-11-20", "t": "Rules and regulators", "k": "Brief section", "h": "briefs/2026-11-20.html", "x": "Rules and regulators EU AI Act: EU lawmakers have agreed to delay the rules for \"high-risk\" AI systems (credit scoring is one) beyond the original August 2026 date.  Germany is calling for a lighter touch still.  US–China chips: Washington moved to restrict Chinese remote access to US chips through overseas cloud services, and Beijing threatened countermeasures.  Deepfakes: campaigners urged the US House to pass the DEFIANCE Act, which the Senate has approved. It would let victims of sexual deepfakes sue. "}, {"d": "2026-11-20", "t": "For photographers and artists", "k": "Brief section", "h": "briefs/2026-11-20.html", "x": "For photographers and artists For a working photographer: keep originals and shoot metadata, register key work where possible, check platform settings about AI training, and spell out AI use in client contracts."}, {"d": "2026-11-20", "t": "Schools and families", "k": "Brief section", "h": "briefs/2026-11-20.html", "x": "Schools and families"}, {"d": "2026-11-20", "t": "Try this today", "k": "Brief section", "h": "briefs/2026-11-20.html", "x": "Try this today The 5-minute AI reputation check. Paste this into ChatGPT, Gemini and Claude, then compare the answers with what your bank actually says: I'm a customer thinking about [product] from [bank]. In plain English, what are its fees, risks and protections? What would you warn me about? List your sources. Note anything wrong or out of date, and fix it at the source: the product page, FAQs or press pages."}, {"d": "2026-11-20", "t": "Watchlist (next few days and beyond)", "k": "Brief section", "h": "briefs/2026-11-20.html", "x": "Watchlist (next few days and beyond) More banks updating their terms on customers' AI agents, and any response from UK or EU regulators. Anthropic's early trading, and its expected addition to the Nasdaq 100 index on 21 Dec.  Jensen Huang before House committees on 1 Dec, then Nvidia's general counsel on 2 Dec; also the search for a permanent CEO.  Formal adoption of the EU AI Act delay, and the end-2026 EU checkpoint for PQC. Google's school AI controls, due early 2027. "}, {"d": "2026-11-20", "t": "Confidence and gaps", "k": "Brief section", "h": "briefs/2026-11-20.html", "x": "Confidence and gaps This first edition covers about a week rather than 24 hours. From tomorrow, each brief covers the previous day. Anthropic's first-day share price could not be confirmed at the time of writing. Several items rely on a daily AI news digest (The Neuron) that summarises other outlets. These are marked as secondary sources, and the Java item is Unverified. The exact date of the EU AI Act deal was not confirmed today."}], "incidents": [{"key": "bank-agent-liability", "kind": "Story", "dates": ["2026-11-20"], "name": "Banks shift AI-agent liability to customers", "sev": "crit", "summary": "An \"AI agent\" is software that can log in and act for a person, for example paying bills or moving money. Many customers now hand these tools their banking passwords."}, {"key": "anthropic-ipo", "kind": "Story", "dates": ["2026-11-20"], "name": "Anthropic goes public (ANT)", "sev": "high", "summary": "Anthropic makes the Claude AI models used widely by businesses, including banks. It is the first company that only makes frontier AI models to go public."}, {"key": "fca-ai-practice", "kind": "Story", "dates": ["2026-11-20"], "name": "FCA AI good and poor practice", "sev": "high", "summary": "The Financial Conduct Authority (FCA) regulates how UK financial firms treat customers. It has chosen not to write new AI rules and is instead showing firms what good practice looks like."}, {"key": "getty-stability-appeal", "kind": "Story", "dates": ["2026-11-20"], "name": "Getty v Stability AI (UK appeal)", "sev": "high", "summary": "Getty Images, the photo library, sued Stability AI, maker of the Stable Diffusion image generator, for using its photos to train AI. It mostly lost in the High Court in November 2025."}, {"key": "google-schools-ai", "kind": "Story", "dates": ["2026-11-20"], "name": "Google ties school Search to AI", "sev": "high", "summary": "Many schools run on Google's education tools (Classroom, Chromebooks). Google's Search now includes AI-written answers."}, {"key": "nvidia-leadership-china", "kind": "Story", "dates": ["2026-11-20"], "name": "Nvidia: CEO exit and China halt", "sev": "high", "summary": "Nvidia makes the graphics chips (GPUs) that train and run almost all large AI models. Its supply decisions shape what AI costs everyone."}, {"key": "model-race", "kind": "Story", "dates": ["2026-11-20"], "name": "Frontier model race", "sev": "med", "summary": "\"Frontier\" models are the most capable AI systems available. Each new release changes what is cheap, fast and possible."}, {"key": "youth-ai-companions", "kind": "Story", "dates": ["2026-11-20"], "name": "Young people and AI companions", "sev": "med", "summary": "A Gallup and Boston Children's Hospital survey of 15,925 people aged 15–22 in 16 countries found a median of 33% had used AI as a companion or friend. The figure rises to 50% among daily AI users. Those users were more likely to report loneliness, though the survey cannot show ca…"}], "glossary": [{"term": "AI agent", "dates": ["2026-11-20"], "defn": "AI software that takes actions for a person (logging in, filling forms, paying), not just answering questions.", "id": "g-ai-agent"}, {"term": "AI companion", "dates": ["2026-11-20"], "defn": "A chatbot used for friendship or emotional support rather than for information or tasks.", "id": "g-ai-companion"}, {"term": "AI Overviews", "dates": ["2026-11-20"], "defn": "AI-written summaries that appear at the top of some Google search results.", "id": "g-ai-overviews"}, {"term": "Cryptographic inventory", "dates": ["2026-11-20"], "defn": "A list of where and how an organisation uses encryption: the first step of any PQC migration.", "id": "g-cryptographic-inventory"}, {"term": "Frontier model", "dates": ["2026-11-20"], "defn": "One of the most capable AI models available at a given time, from labs such as OpenAI, Anthropic and Google.", "id": "g-frontier-model"}, {"term": "GPU", "dates": ["2026-11-20"], "defn": "Graphics processing unit: the chip type used to train and run most AI models.", "id": "g-gpu"}, {"term": "High-risk AI system", "dates": ["2026-11-20"], "defn": "Under the EU AI Act, AI used in sensitive areas such as credit scoring or hiring, which carries the strictest obligations.", "id": "g-high-risk-ai-system"}, {"term": "Infringing copy", "dates": ["2026-11-20"], "defn": "A UK copyright term for an item made by copying protected work; the Getty appeal asks whether a trained AI model can be one.", "id": "g-infringing-copy"}, {"term": "IPO", "dates": ["2026-11-20"], "defn": "Initial public offering: when a private company first sells shares on a stock exchange.", "id": "g-ipo"}, {"term": "Post-quantum cryptography (PQC)", "dates": ["2026-11-20"], "defn": "New encryption methods designed to resist future quantum computers, which could break today's public-key encryption.", "id": "g-post-quantum-cryptography-pqc"}, {"term": "Preparedness Framework", "dates": ["2026-11-20"], "defn": "OpenAI's internal system for rating how dangerous a model's capabilities are (for example in cyber attacks) and what safeguards it needs.", "id": "g-preparedness-framework"}, {"term": "Sandbox", "dates": ["2026-11-20"], "defn": "A walled-off space where software, including an AI agent, can run without touching real systems.", "id": "g-sandbox"}]}</script>
+<script>
+(function(){
+  var a=document.getElementById('audio'); if(!a) return;
+  var p=a.closest('.player'), pp=document.getElementById('pp'), seek=document.getElementById('seek'),
+      tcur=document.getElementById('tcur'), tdur=document.getElementById('tdur'), rate=document.getElementById('rate');
+  function fmt(t){t=Math.max(0,Math.floor(t||0));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0');}
+  // Speed: one button that cycles 1x -> 1.25x -> 1.5x, remembered on this device.
+  var RATES=[1,1.25,1.5], KR='aibrief-rate';
+  function setRate(r){a.playbackRate=r;a.defaultPlaybackRate=r;rate.textContent=r+'×';rate.classList.toggle('on',r!==1);
+    rate.setAttribute('aria-label','Playback speed, '+r+' times');try{localStorage.setItem(KR,String(r));}catch(e){}}
+  var r0=1;try{r0=parseFloat(localStorage.getItem(KR))||1;}catch(e){} if(RATES.indexOf(r0)<0)r0=1; setRate(r0);
+  rate.addEventListener('click',function(){setRate(RATES[(RATES.indexOf(a.playbackRate)+1)%RATES.length]||1);});
+  a.addEventListener('loadedmetadata',function(){a.playbackRate=a.defaultPlaybackRate;});
+  // Play / pause
+  pp.addEventListener('click',function(){if(a.paused){a.play().catch(function(){});}else{a.pause();}});
+  function state(){var on=!a.paused&&!a.ended;p.classList.toggle('playing',on);pp.setAttribute('aria-label',on?'Pause':'Play');}
+  ['play','playing','pause','ended','emptied'].forEach(function(ev){a.addEventListener(ev,state);});
+  // Scrubber and times
+  var dragging=false;
+  function paint(t){var d=a.duration;var f=(isFinite(d)&&d>0)?Math.min(1,t/d):0;seek.style.setProperty('--p',(f*100).toFixed(2)+'%');tcur.textContent=fmt(t);}
+  function tick(){if(dragging)return;var d=a.duration;seek.value=(isFinite(d)&&d>0)?Math.round(a.currentTime/d*1000):0;paint(a.currentTime);}
+  function durUp(){tdur.textContent=isFinite(a.duration)&&a.duration>0?fmt(a.duration):'--:--';tick();}
+  ['timeupdate','seeked','loadedmetadata','durationchange','emptied'].forEach(function(ev){a.addEventListener(ev,ev==='timeupdate'||ev==='seeked'?tick:durUp);});
+  durUp(); state();
+  seek.addEventListener('input',function(){dragging=true;var d=a.duration;if(isFinite(d))paint(seek.value/1000*d);});
+  seek.addEventListener('change',function(){var d=a.duration;if(isFinite(d)&&d>0){try{a.currentTime=seek.value/1000*d;}catch(e){} a.dispatchEvent(new Event('cb-userseek'));}dragging=false;tick();});
+  // Skip 10 seconds (buttons, lock screen and headphones)
+  function skip(s){var d=a.duration,t=(a.currentTime||0)+s;if(isFinite(d)&&d>0)t=Math.min(t,d-0.25);
+    try{a.currentTime=Math.max(0,t);}catch(e){} a.dispatchEvent(new Event('cb-userseek'));tick();}
+  document.querySelectorAll('.player .skip').forEach(function(b){b.addEventListener('click',function(){skip(parseFloat(b.dataset.s));});});
+  if('mediaSession' in navigator){try{
+    navigator.mediaSession.setActionHandler('seekbackward',function(e){skip(-((e&&e.seekOffset)||10));});
+    navigator.mediaSession.setActionHandler('seekforward',function(e){skip((e&&e.seekOffset)||10);});}catch(e){}}
+  if('mediaSession' in navigator){try{navigator.mediaSession.metadata=new MediaMetadata({title:'AI Brief, 20 Nov 2026',artist:'Daily AI briefing'});}catch(e){}}
+})();
+</script>
+<script>
+/* Voice picker: Emma (British female), Louis (British male), Kim (American female),
+   Tony (old-school mob boss) and MC Patch (rapper over a generated beat) -- original characters.
+   The choice is remembered on this device; switching keeps your place in the brief. */
+(function(){
+  var p=document.querySelector('.player'), a=document.getElementById('audio'); if(!p||!a) return;
+  var KEYV='aibrief-voice', NAMES={emma:'Emma',fable:'Louis',heart:'Kim',boss:'Tony',rapper:'MC Patch'};
+  function get(){try{return localStorage.getItem(KEYV)||'emma';}catch(e){return 'emma';}}
+  function srcFor(d,v){return (p.dataset.base||'')+'audio/'+d+(v==='emma'?'':'-'+v)+'.mp3';}
+  function list(){return (p.dataset.voices||'emma').split(',');}
+  function render(){var box=p.querySelector('.voices');if(!box)return;var vs=list(),cur=p.dataset.voice||'emma';box.hidden=vs.length<2;
+    box.innerHTML='<span>Voice</span>'+vs.map(function(v){return '<button type="button" data-v="'+v+'" aria-pressed="'+(v===cur)+'">'+(NAMES[v]||v)+'</button>';}).join('');}
+  function pick(d,vs){var pref=get();return vs.indexOf(pref)>=0?pref:'emma';}
+  window.cbVoice={
+    forDay:function(d,voices){p.dataset.date=d;p.dataset.voices=voices||'emma';p.dataset.voice=pick(d,list());render();return srcFor(d,p.dataset.voice);},
+    sync:function(src){var m=(src||'').match(/(\d{4}-\d{2}-\d{2})(?:-([a-z]+))?\.mp3/);if(!m)return;var v=m[2]||'emma';
+      p.dataset.date=m[1];if(list().indexOf(v)<0)p.dataset.voices=list().concat(v).join(',');p.dataset.voice=v;render();}
+  };
+  var v0=pick(p.dataset.date,list());
+  if(v0!=='emma'){a.setAttribute('src',srcFor(p.dataset.date,v0));}
+  p.dataset.voice=v0; render();
+  p.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('.voices button'); if(!b) return;
+    var v=b.getAttribute('data-v'); if(v===p.dataset.voice) return;
+    var playing=!a.paused, ratio=(isFinite(a.duration)&&a.duration)?a.currentTime/a.duration:0, rate=a.playbackRate;
+    p.dataset.voice=v; try{localStorage.setItem(KEYV,v);}catch(err){} render();
+    a.setAttribute('src',srcFor(p.dataset.date,v)); a.load();
+    a.addEventListener('loadedmetadata',function f(){a.removeEventListener('loadedmetadata',f);
+      if(ratio){try{a.currentTime=ratio*a.duration;}catch(err){}} a.playbackRate=rate; if(playing) a.play().catch(function(){});});
+  });
+})();
+</script>
+<script>
+(function(){
+  var DATA=JSON.parse(document.getElementById('search-data').textContent);
+  var form=document.getElementById('sform'), q=document.getElementById('q'), out=document.getElementById('results');
+  var sec=document.getElementById('search'), tl=document.querySelector('.toolbar a[href="#search"]');
+  function showSearch(open,focus){sec.hidden=!open; if(tl) tl.setAttribute('aria-expanded',String(open)); if(open&&focus){q.focus({preventScroll:true}); sec.scrollIntoView({block:'nearest',behavior:'smooth'});}}
+  if(tl){tl.setAttribute('aria-controls','search'); tl.setAttribute('aria-expanded','false'); tl.addEventListener('click',function(e){e.preventDefault(); showSearch(sec.hidden,true);});}
+  if(location.hash==='#search') showSearch(true,false);
+  var aiBtn=document.getElementById('askai'), stopBtn=document.getElementById('stopai'), aiBox=document.getElementById('aibox'), aiOut=document.getElementById('aiout'), aiNote=document.getElementById('ainote');
+  function esc(s){return s.replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]});}
+  function toks(s){return s.toLowerCase().split(/[^a-z0-9\-]+/).filter(function(t){return t.length>1;});}
+  function nice(d){var x=new Date(d+'T00:00:00Z');return x.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});}
+  function snippet(text,ts){
+    var low=text.toLowerCase(), i=-1;
+    for(var k=0;k<ts.length&&i<0;k++) i=low.indexOf(ts[k]);
+    var s=Math.max(0,i-80), e=Math.min(text.length,(i<0?0:i)+180);
+    var sn=(s>0?'… ':'')+text.slice(s,e)+(e<text.length?' …':'');
+    var h=esc(sn);
+    ts.forEach(function(t){h=h.replace(new RegExp('('+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','ig'),'<mark>$1</mark>');});
+    return h;
+  }
+  function score(text,ts){var low=text.toLowerCase(),n=0;for(var i=0;i<ts.length;i++){var c=low.split(ts[i]).length-1;if(!c)return 0;n+=c;}return n;}
+  var last=[];
+  function run(query){
+    var ts=toks(query); last=[];
+    if(!ts.length){out.innerHTML='';aiBox.hidden=true;return;}
+    var docs=DATA.docs.map(function(d){return {d:d,s:score(d.t+' '+d.x,ts)};}).filter(function(r){return r.s>0;}).sort(function(a,b){return b.s-a.s||(b.d.d>a.d.d?1:-1);}).slice(0,8);
+    var inc=DATA.incidents.filter(function(e){return score(e.name+' '+e.summary,ts)>0;});
+    var gl=DATA.glossary.filter(function(g){return score(g.term+' '+g.defn,ts)>0;});
+    last=docs.map(function(r){return r.d;});
+    var h='';
+    if(inc.length){h+='<div><h3>Stories</h3><ul class="hits">'+inc.map(function(e){return '<li><span class="when">'+esc(e.kind)+' · last covered '+nice(e.dates[e.dates.length-1])+'</span><a href="#i-'+e.key+'"><strong>'+esc(e.name)+'</strong></a><span>'+snippet(e.summary,ts)+'</span></li>';}).join('')+'</ul></div>';}
+    if(gl.length){h+='<div><h3>Glossary</h3><ul class="hits">'+gl.map(function(g){return '<li><a href="#'+g.id+'" data-term="'+g.id+'"><strong>'+esc(g.term)+'</strong></a><span>'+esc(g.defn)+'</span></li>';}).join('')+'</ul></div>';}
+    if(docs.length){h+='<div><h3>In the briefs</h3><ul class="hits">'+docs.map(function(r){return '<li><span class="when">'+nice(r.d.d)+' · '+esc(r.d.k)+'</span><a href="'+r.d.h+'"><strong>'+esc(r.d.t)+'</strong></a><span>'+snippet(r.d.x,ts)+'</span></li>';}).join('')+'</ul></div>';}
+    if(!h) h='<p class="meta">Nothing in the briefs matches "'+esc(query)+'". Try the web searches below.</p>';
+    var qq=encodeURIComponent(query), qc=encodeURIComponent(query+' AI');
+    h+='<div><h3>Search the internet</h3><div class="weblinks">'+
+      '<a href="https://news.google.com/search?q='+qc+'" target="_blank" rel="noopener">Google News</a>'+
+      '<a href="https://www.google.com/search?q='+qc+'" target="_blank" rel="noopener">Google</a>'+
+      '<a href="https://www.bing.com/news/search?q='+qc+'" target="_blank" rel="noopener">Bing News</a>'+
+      '<a href="https://www.google.com/search?q='+qq+'+AI+site%3Atechcrunch.com+OR+site%3Atheverge.com+OR+site%3Areuters.com" target="_blank" rel="noopener">Tech news sites</a>'+
+      '<a href="https://www.google.com/search?q='+qq+'+AI+site%3Afca.org.uk+OR+site%3Abankofengland.co.uk+OR+site%3Aeuropa.eu" target="_blank" rel="noopener">Regulators</a>'+
+      '</div></div>';
+    out.innerHTML=h;
+    if(sample) aiBox.hidden=false;
+  }
+  form.addEventListener('submit',function(e){e.preventDefault();run(q.value.trim());});
+  var tmr; q.addEventListener('input',function(){clearTimeout(tmr);tmr=setTimeout(function(){run(q.value.trim());},250);});
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('a[data-term]'); if(!a) return;
+    var el=document.getElementById(a.getAttribute('data-term')); if(el){el.open=true;}
+  });
+  function openFromHash(){var id=location.hash.slice(1);var el=id&&document.getElementById(id);if(el&&el.tagName==='DETAILS')el.open=true;}
+  window.addEventListener('hashchange',openFromHash); openFromHash();
+
+  var sample=null, ctl=null;
+  if(window.claude&&claude.use){claude.use('sample').then(function(s){sample=s; if(s&&q.value.trim()) aiBox.hidden=false;}).catch(function(){});}
+  var COPY={not_granted:'Claude is turned off for this page.',sampling_disabled:'Claude is not available on this account.',rate_limited:'Too many requests just now. Try again in a minute.',session_expired:'Please sign in to Claude again.',refused:'Claude declined to answer that. Try rephrasing.'};
+  aiBtn.addEventListener('click',function(){
+    var query=q.value.trim(); if(!sample||!query) return;
+    var ctxt=last.slice(0,6).map(function(d){return '['+d.d+' · '+d.t+'] '+d.x.slice(0,1200);}).join('\n\n');
+    var prompt='You are helping a senior bank executive whose work spans products, communications, risk narratives, cyber, engineering, transformation and post-quantum cryptography. Explain "'+query+'" in plain English: what it is, who is involved (one sentence on what each company or group does), what happened and why it matters for her work, for a bank, and for everyday life. Keep it under 200 words, no headings, no markdown symbols. Use the excerpts from our daily briefs below as your main source and say which brief dates you relied on. If something is not in the excerpts, you may add general background you are confident about, but say clearly that you cannot check live news and the reader should verify recent details. Do not invent dates, numbers or events.\n\nExcerpts from our briefs:\n'+(ctxt||'(none matched)');
+    ctl=new AbortController(); aiBtn.disabled=true; stopBtn.hidden=false; aiOut.hidden=false; aiOut.textContent='Thinking…'; aiNote.textContent='';
+    sample(prompt,{signal:ctl.signal,onText:function(u){aiOut.textContent=u.text;}}).then(function(r){
+      aiNote.textContent='Written by Claude from these briefs and its general knowledge. It cannot browse live news, so verify recent details.'+(r.truncated?' (Answer was cut short.)':'');
+    }).catch(function(e){
+      aiOut.textContent=(e&&e.text)||'';
+      if(e&&e.code==='cancelled'){if(!aiOut.textContent)aiOut.hidden=true;return;}
+      if(e&&(e.code==='not_granted'||e.code==='sampling_disabled'||e.code==='not_declared'||e.code==='capability_disabled'||e.code==='capability_removed')){aiBox.hidden=true;sample=null;}
+      aiNote.textContent=(e&&COPY[e.code])||'Claude could not answer just now. Try again.';
+      if(!aiOut.textContent)aiOut.hidden=true;
+    }).finally(function(){aiBtn.disabled=false;stopBtn.hidden=true;});
+  });
+  stopBtn.addEventListener('click',function(){ctl&&ctl.abort();});
+})();
+</script>
+<script>
+/* Keeps the audio playing while moving around: archive days open inside this page,
+   other websites open in a new tab, and the listening position survives a refresh. */
+(function(){
+  var LATEST='2026-11-20';
+  var a=document.getElementById('audio'), dur=document.getElementById('dur');
+  var head=document.getElementById('brief-head'), body=document.getElementById('brief-body');
+  if(!a||!head||!body) return;
+  var orig={head:head.innerHTML, body:body.innerHTML}, shown=LATEST, cache={}, voicesFor={};
+  var KEY='aibrief-audio';
+  function nice(d){var x=new Date(d+'T00:00:00Z');return x.toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'UTC'});}
+  function fmt(s){s=Math.max(0,Math.floor(s||0));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+  function dateOf(src){var m=(src||'').match(/(\d{4}-\d{2}-\d{2})(?:-[a-z]+)?\.mp3/);return m?m[1]:LATEST;}
+  var pending='', resumeAt=0;
+  function label(extra){if(extra!==undefined)pending=extra;var d=dateOf(a.getAttribute('src'));var len=isFinite(a.duration)?fmt(a.duration):'';dur.textContent='Brief of '+nice(d)+(pending?' · '+pending:'');
+    if('mediaSession' in navigator){try{navigator.mediaSession.metadata=new MediaMetadata({title:'AI Brief, '+nice(d),artist:'Daily AI briefing'});}catch(e){}}}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify({src:a.getAttribute('src'),t:a.currentTime,at:Date.now()}));}catch(e){}}
+  function setSrc(src,t){ if(a.getAttribute('src')!==src){a.setAttribute('src',src);a.load();}
+    if(t){var go=function(){try{a.currentTime=t;}catch(e){} a.removeEventListener('loadedmetadata',go);}; if(a.readyState>=1) go(); else a.addEventListener('loadedmetadata',go);} label(); }
+  // Restore the last position after a refresh (browsers need one tap to start sound again).
+  try{var s=JSON.parse(localStorage.getItem(KEY)||'null');
+    // Only resume today's brief; a half-heard older brief must not replace today's audio.
+    if(s&&s.src&&dateOf(s.src)!==LATEST){localStorage.removeItem(KEY);s=null;}
+    if(s&&s.src&&s.t>3&&Date.now()-s.at<7*864e5){resumeAt=s.t;setSrc(s.src,s.t);if(window.cbVoice)cbVoice.sync(s.src);label('resume at '+fmt(s.t));}else{label();}}catch(e){label();}
+  var last=0;a.addEventListener('timeupdate',function(){var n=Date.now();if(n-last>2000){last=n;save();}});
+  a.addEventListener('pause',save);a.addEventListener('play',function(){if(resumeAt&&a.currentTime<resumeAt-2){try{a.currentTime=resumeAt;}catch(e){}}resumeAt=0;label('');});a.addEventListener('loadedmetadata',function(){label();});
+  a.addEventListener('ended',function(){try{localStorage.removeItem(KEY);}catch(e){}});
+  a.addEventListener('cb-userseek',function(){resumeAt=0;});
+  window.addEventListener('pagehide',save);
+
+  // An installed app can sit in memory overnight. When it comes back to the front with the
+  // audio paused, check whether a newer edition is out and, if so, reload to get it.
+  var checkedAt=Date.now();
+  function checkNew(force){
+    if(document.visibilityState!=='visible'||!a.paused) return;
+    if(!force&&Date.now()-checkedAt<5*60e3) return; checkedAt=Date.now();
+    fetch(location.href.split('#')[0],{cache:'no-store'}).then(function(r){return r.ok?r.text():'';}).then(function(t){
+      var m=t.match(/var LATEST='(\d{4}-\d{2}-\d{2})'/); if(m&&m[1]>LATEST&&a.paused) location.reload();}).catch(function(){});
+  }
+  document.addEventListener('visibilitychange',function(){checkNew(false);});
+  window.addEventListener('pageshow',function(e){if(e.persisted)checkNew(true);});
+  window.addEventListener('focus',function(){checkNew(false);});
+
+  // Open archive days inside this page so the player keeps going.
+  function route(){
+    var m=location.hash.match(/^#d-(\d{4}-\d{2}-\d{2})(?:-(.+))?$/);
+    if(!m){ if(shown!==LATEST&&(location.hash===''||location.hash==='#latest')) show(LATEST); return; }
+    show(m[1],m[2]);
+  }
+  function scrollTo(id){var el=id&&document.getElementById(id);(el||head).scrollIntoView({block:'start'});}
+  function bar(d){return '<p class="viewing"><span>Viewing the brief of '+nice(d)+'</span> <a href="#latest">Back to latest</a> '+
+    (dateOf(a.getAttribute('src'))===d?'':'<button type="button" class="btn ghost playday" data-d="'+d+'">Play this day’s audio</button>')+'</p>';}
+  function show(d,anchor){
+    if(d===LATEST){head.innerHTML=orig.head;body.innerHTML=orig.body;shown=LATEST;scrollTo(anchor);return;}
+    var done=function(html){var doc=new DOMParser().parseFromString(html,'text/html');var w=doc.querySelector('.wrap');if(!w)return;
+      var h=w.querySelector('header');var pl=w.querySelector('.player');voicesFor[d]=pl?pl.getAttribute('data-voices'):'emma';var parts=[].slice.call(w.children).filter(function(el){return el.tagName==='SECTION';});
+      head.innerHTML=bar(d)+(h?h.outerHTML:'');body.innerHTML=parts.map(function(el){return el.outerHTML;}).join('\n');shown=d;scrollTo(anchor);};
+    if(cache[d]) return done(cache[d]);
+    fetch('briefs/'+d+'.html').then(function(r){if(!r.ok)throw 0;return r.text();}).then(function(x){cache[d]=x;done(x);})
+      .catch(function(){location.href='briefs/'+d+'.html';});
+  }
+  window.addEventListener('hashchange',route);
+  document.addEventListener('click',function(e){
+    var el=e.target.closest&&e.target.closest('a,button.playday'); if(!el) return;
+    if(el.classList&&el.classList.contains('playday')){var d=el.getAttribute('data-d');label('');setSrc(window.cbVoice?cbVoice.forDay(d,voicesFor[d]):'audio/'+d+'.mp3');a.play().catch(function(){});el.remove();return;}
+    var href=el.getAttribute('href')||'';
+    var m=href.match(/^(?:\.\.\/|\/)?briefs\/(\d{4}-\d{2}-\d{2})\.html(?:#(.*))?$/);
+    if(m){e.preventDefault();var h='#d-'+m[1]+(m[2]?'-'+m[2]:'');if(location.hash===h)route();else location.hash=h;return;}
+    if(/^https?:/i.test(href)&&el.host!==location.host){el.target='_blank';el.rel='noopener';}
+  },true);
+  if(/^#d-/.test(location.hash)) route();
+})();
+</script>
+
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}</script>
+</body>
+</html>
